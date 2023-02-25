@@ -1,0 +1,142 @@
+{
+  "project_info": {
+    "project_number": "515730826407",
+    "project_id": "devtee-93ae3",
+    "storage_bucket": "devtee-93ae3.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:515730826407:android:da303f14fb7c42f8096782",
+        "android_client_info": {
+          "package_name": "com.billup"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "515730826407-3n5u3ss7jv9m8j5e84fopf7kjc3ms2rj.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.billup",
+            "certificate_hash": "5e8f16062ea3cd2c4a0d547876baa6f38cabf625"
+          }
+        },
+        {
+          "client_id": "515730826407-ki1m138slk6c6og1arbkei85ou5m68j0.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyCH3L_W7sK9RgK4_VXWrDdmw6jQSjjQtic"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "515730826407-3qa3d31d1lags548gkfr9jlpf1no71qa.apps.googleusercontent.com",
+              "client_type": 3
+            },
+            {
+              "client_id": "515730826407-7tsdmrti6sva7f0atj52tij7brheeg4f.apps.googleusercontent.com",
+              "client_type": 2,
+              "ios_info": {
+                "bundle_id": "org.reactjs.native.example.billup"
+              }
+            }
+          ]
+        }
+      }
+    },
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:515730826407:android:69c8df082d297579096782",
+        "android_client_info": {
+          "package_name": "com.customertab"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "515730826407-kt3jda814cin4s74073ulkofjddtccf5.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.customertab",
+            "certificate_hash": "5e8f16062ea3cd2c4a0d547876baa6f38cabf625"
+          }
+        },
+        {
+          "client_id": "515730826407-ki1m138slk6c6og1arbkei85ou5m68j0.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyCH3L_W7sK9RgK4_VXWrDdmw6jQSjjQtic"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "515730826407-3qa3d31d1lags548gkfr9jlpf1no71qa.apps.googleusercontent.com",
+              "client_type": 3
+            },
+            {
+              "client_id": "515730826407-7tsdmrti6sva7f0atj52tij7brheeg4f.apps.googleusercontent.com",
+              "client_type": 2,
+              "ios_info": {
+                "bundle_id": "org.reactjs.native.example.billup"
+              }
+            }
+          ]
+        }
+      }
+    },
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:515730826407:android:74ad7db40e04b934096782",
+        "android_client_info": {
+          "package_name": "com.firstapp"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "515730826407-d34ngns3dmg4l8ao8bi4no03a43qg9lk.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.firstapp",
+            "certificate_hash": "01c73006d8bb19cb3e2d2e32bd3cad4da724303f"
+          }
+        },
+        {
+          "client_id": "515730826407-ki1m138slk6c6og1arbkei85ou5m68j0.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyCH3L_W7sK9RgK4_VXWrDdmw6jQSjjQtic"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "515730826407-3qa3d31d1lags548gkfr9jlpf1no71qa.apps.googleusercontent.com",
+              "client_type": 3
+            },
+            {
+              "client_id": "515730826407-7tsdmrti6sva7f0atj52tij7brheeg4f.apps.googleusercontent.com",
+              "client_type": 2,
+              "ios_info": {
+                "bundle_id": "org.reactjs.native.example.billup"
+              }
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

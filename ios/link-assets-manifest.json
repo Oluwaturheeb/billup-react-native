@@ -1,0 +1,53 @@
+{
+  "migIndex": 1,
+  "data": [
+    {
+      "path": "assets/fonts/Alegreya-Black.ttf",
+      "sha1": "96f9623dbebc78d2625314513f3556b4d3590b0e"
+    },
+    {
+      "path": "assets/fonts/Alegreya-BlackItalic.ttf",
+      "sha1": "fc65b82f0d0b1b63a654ded6d73bc52802e1d10c"
+    },
+    {
+      "path": "assets/fonts/Alegreya-Bold.ttf",
+      "sha1": "c0de64d0c6d81d0b62d9ee51048e43e1927dff36"
+    },
+    {
+      "path": "assets/fonts/Alegreya-BoldItalic.ttf",
+      "sha1": "5cddd24b7e9993517f16a425fda1908ba42dba17"
+    },
+    {
+      "path": "assets/fonts/Alegreya-ExtraBold.ttf",
+      "sha1": "29d731914e5d54f44b9d73bcb0556d2f16540ca1"
+    },
+    {
+      "path": "assets/fonts/Alegreya-ExtraBoldItalic.ttf",
+      "sha1": "d7c8dfd2b1b51462e3f68e2044560caeddd8d53c"
+    },
+    {
+      "path": "assets/fonts/Alegreya-Italic.ttf",
+      "sha1": "ff0af24c1f371b7840c582a4f9072847d54f0db4"
+    },
+    {
+      "path": "assets/fonts/Alegreya-Medium.ttf",
+      "sha1": "a2a25b29e9a1a1b5fe531033a021c45f2db495e7"
+    },
+    {
+      "path": "assets/fonts/Alegreya-MediumItalic.ttf",
+      "sha1": "21e53f2fe42da718e4403fb0f0bd6afe4bdd2412"
+    },
+    {
+      "path": "assets/fonts/Alegreya-Regular.ttf",
+      "sha1": "e622451ceb76126ad0ace9af57f514b0828f05b3"
+    },
+    {
+      "path": "assets/fonts/Alegreya-SemiBold.ttf",
+      "sha1": "1c65d7d2455232c6f2ea6751da234162b387ca6b"
+    },
+    {
+      "path": "assets/fonts/Alegreya-SemiBoldItalic.ttf",
+      "sha1": "1ece09a5570bb69a9b57d11baefd1abe9b38a2c1"
+    }
+  ]
+}
