@@ -137,6 +137,14 @@ export const transactionResponse: TransactionResponse = {
   fixChargeAmount: null,
   tariff: '',
   taxAmount: null,
+  tokens: '',
+  cards: [
+    {
+      Serial: '',
+      Pin: '',
+    },
+  ],
+  Pin: '',
 };
 
 export const logs: Logs = {

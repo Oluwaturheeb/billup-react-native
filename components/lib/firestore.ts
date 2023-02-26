@@ -46,6 +46,25 @@ export const updateFirebase = async (
   }
 };
 
+export const adminTransaction = async (data: any, which = 'Payment') => {
+  let obj =
+    which != 'Payment'
+      ? {
+          commission: field.increment(data.commission),
+          transactions: {
+            id: data.id,
+            transaction: field.arrayUnion(data.transaction),
+          },
+        }
+      : {
+          payments: {
+            id: data.id,
+            transaction: data.info,
+          },
+        };
+  await users.doc('PXlO3KDmrEwbDTwsprSM').update(obj);
+};
+
 export const dateFormat = (date: number) => {
   let newDate = new Intl.DateTimeFormat('en-GB', {
     year: 'numeric',
@@ -59,3 +78,5 @@ export const dateFormat = (date: number) => {
 
   return newDate.format(new Date(date * 1000));
 };
+
+export const chunk = (string: string) => string.match(/.{1,4}/g)?.join(' - ');

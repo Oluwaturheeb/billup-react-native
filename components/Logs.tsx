@@ -13,7 +13,7 @@ import {useUser} from './lib/context';
 import styles from './styles';
 import {Logs as TLog, TransactionResponse} from './interfaces';
 import {logs as SLog} from './schema';
-import {dateFormat, money} from './lib/firestore';
+import {chunk, dateFormat, money} from './lib/firestore';
 import {ScrollView} from 'react-native-gesture-handler';
 
 const Logs = () => {
@@ -31,7 +31,7 @@ const Logs = () => {
   const LogAction = () => {
     let {data} = action;
     let info: TransactionResponse = data.info;
-    console.log(info);
+
     return (
       <Modal
         visible={action.show}
@@ -44,13 +44,13 @@ const Logs = () => {
             padding: 20,
             backgroundColor: 'rgba(0, 0, 0, .3)',
           }}>
-          <View
+          <ScrollView
             style={{
               backgroundColor: MD2Colors.grey300,
               width: '100%',
               borderRadius: 10,
-              height: '90%',
-              top: '7%',
+              height: '93%',
+              top: '5%',
             }}>
             <View
               style={{
@@ -72,93 +72,128 @@ const Logs = () => {
                 size={180}
               />
             </View>
-            <Text
-              variant="titleLarge"
-              style={{textAlign: 'center', color: pry, marginBottom: 10}}>
-              Transaction Information
-            </Text>
-            <Text variant="bodySmall" style={{textAlign: 'center', color: pry}}>
-              {data.title}
-            </Text>
-            {info.token && (
+            <View style={{padding: 16}}>
               <Text
-                variant="bodyLarge"
-                style={{textAlign: 'center', color: click}}>
-                {info.token}
+                variant="titleLarge"
+                style={{textAlign: 'center', color: pry, marginBottom: 10}}>
+                Transaction Information
               </Text>
-            )}
-            <Text variant="bodySmall" style={{textAlign: 'center', color: pry}}>
-              {data.desc}
-            </Text>
-            <ScrollView
-              showsVerticalScrollIndicator={false}
-              style={{marginBottom: 50}}>
-              <View style={[styles.frow, styles.fspace, styles.p1]}>
+              <Text
+                variant="bodySmall"
+                style={{textAlign: 'center', color: pry}}>
+                {data.title}
+              </Text>
+              <Text
+                variant="bodySmall"
+                style={{textAlign: 'center', color: pry}}>
+                {data.desc}
+              </Text>
+              {info.token && (
                 <Text
-                  variant="bodySmall"
-                  style={{textAlign: 'center', color: pry}}>
-                  Amount
+                  variant="bodyLarge"
+                  style={{textAlign: 'center', color: click}}>
+                  {chunk(info.token.split(': ')[1])}
                 </Text>
-                <Text
-                  variant="bodySmall"
-                  style={{textAlign: 'center', color: pry}}>
-                  {money(data.amount)}
-                </Text>
-              </View>
-              <View style={[styles.frow, styles.fspace, styles.p1]}>
-                <Text
-                  variant="bodySmall"
-                  style={{textAlign: 'center', color: pry}}>
-                  Transaction Status
-                </Text>
-                <Text
-                  variant="bodySmall"
-                  style={{textAlign: 'center', color: pry}}>
-                  {data.status === 'failed' ? 'Failed' : 'Successful'}
-                </Text>
-              </View>
-              {info.code != '1' && info.code && (
-                <>
-                  <View style={[styles.frow, styles.fspace, styles.p1]}>
-                    <Text
-                      variant="bodySmall"
-                      style={{textAlign: 'center', color: pry}}>
-                      Transaction ID
-                    </Text>
-                    <Text
-                      variant="bodySmall"
-                      style={{textAlign: 'center', color: pry}}>
-                      {info.content.transactions?.transactionId}
-                    </Text>
-                  </View>
-                  <View style={[styles.frow, styles.fspace, styles.p1]}>
-                    <Text
-                      variant="bodySmall"
-                      style={{textAlign: 'center', color: pry}}>
-                      Unique Element
-                    </Text>
-                    <Text
-                      variant="bodySmall"
-                      style={{textAlign: 'center', color: pry}}>
-                      {info.content.transactions?.unique_element}
-                    </Text>
-                  </View>
-                </>
               )}
-              <View style={[styles.frow, styles.fspace, styles.p1]}>
+              {info.tokens && (
                 <Text
-                  variant="bodySmall"
-                  style={{textAlign: 'center', color: pry}}>
-                  Transaction Date
+                  variant="bodyLarge"
+                  style={{textAlign: 'center', color: click}}>
+                  {chunk(info.tokens[0])}
                 </Text>
-                <Text
-                  variant="bodySmall"
-                  style={{textAlign: 'center', color: pry}}>
-                  {dateFormat(data.createdAt.seconds)}
-                </Text>
+              )}
+              {info.cards && (
+                <View
+                  style={[
+                    styles.p2,
+                    {backgroundColor: click, marginVertical: 5},
+                  ]}>
+                  <View style={[styles.frow, styles.fspace]}>
+                    <Text style={{color: MD2Colors.grey200}} variant="bodySmall">
+                      Serial
+                    </Text>
+                    <Text style={{color:  MD2Colors.grey200}} variant="bodySmall">
+                      {chunk(info.cards[0].Serial)}
+                    </Text>
+                  </View>
+                  <View style={[styles.frow, styles.fspace]}>
+                    <Text style={{color:  MD2Colors.grey200}} variant="bodySmall">
+                      Pin
+                    </Text>
+                    <Text style={{color:  MD2Colors.grey200}} variant="bodySmall">
+                      {chunk(info.cards[0].Pin)}
+                    </Text>
+                  </View>
+                </View>
+              )}
+              <View>
+                <View style={[styles.frow, styles.fspace, styles.p1]}>
+                  <Text
+                    variant="bodySmall"
+                    style={{textAlign: 'center', color: pry}}>
+                    Amount
+                  </Text>
+                  <Text
+                    variant="bodySmall"
+                    style={{textAlign: 'center', color: pry}}>
+                    {money(data.amount)}
+                  </Text>
+                </View>
+                <View style={[styles.frow, styles.fspace, styles.p1]}>
+                  <Text
+                    variant="bodySmall"
+                    style={{textAlign: 'center', color: pry}}>
+                    Transaction Status
+                  </Text>
+                  <Text
+                    variant="bodySmall"
+                    style={{textAlign: 'center', color: pry}}>
+                    {data.status === 'failed' ? 'Failed' : 'Successful'}
+                  </Text>
+                </View>
+                {info.code != '1' && info.code && (
+                  <>
+                    <View style={[styles.frow, styles.fspace, styles.p1]}>
+                      <Text
+                        variant="bodySmall"
+                        style={{textAlign: 'center', color: pry}}>
+                        Transaction ID
+                      </Text>
+                      <Text
+                        variant="bodySmall"
+                        style={{textAlign: 'center', color: pry}}>
+                        {info.content.transactions?.transactionId}
+                      </Text>
+                    </View>
+                    <View style={[styles.frow, styles.fspace, styles.p1]}>
+                      <Text
+                        variant="bodySmall"
+                        style={{textAlign: 'center', color: pry}}>
+                        Unique Element
+                      </Text>
+                      <Text
+                        variant="bodySmall"
+                        style={{textAlign: 'center', color: pry}}>
+                        {info.content.transactions?.unique_element}
+                      </Text>
+                    </View>
+                  </>
+                )}
+                <View style={[styles.frow, styles.fspace, styles.p1]}>
+                  <Text
+                    variant="bodySmall"
+                    style={{textAlign: 'center', color: pry}}>
+                    Transaction Date
+                  </Text>
+                  <Text
+                    variant="bodySmall"
+                    style={{textAlign: 'center', color: pry}}>
+                    {dateFormat(data.createdAt.seconds)}
+                  </Text>
+                </View>
               </View>
-            </ScrollView>
-          </View>
+            </View>
+          </ScrollView>
           <Button
             onPress={() => setAction({...action, show: false})}
             mode="contained"
@@ -167,6 +202,7 @@ const Logs = () => {
               backgroundColor: pry + 'cc',
               width: 100,
               alignSelf: 'center',
+              marginTop: -10,
             }}>
             OK
           </Button>

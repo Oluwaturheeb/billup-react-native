@@ -1,6 +1,6 @@
 /* eslint-disable @typescript-eslint/no-shadow */
 import React, {useState, useEffect} from 'react';
-import {StyleSheet, View, Modal, TouchableOpacity, Alert} from 'react-native';
+import {StyleSheet, View, Modal, TouchableOpacity} from 'react-native';
 import {
   Avatar,
   Card,
@@ -98,7 +98,7 @@ const Services = ({navigation, route}: {navigation: any; route: any}) => {
           selectContact?.biller?.length >= 10 && verifyNumber();
         } else if (curItem.identifier === 'electricity-bill') {
           selectContact?.biller?.length >= 13 && verifyNumber();
-        } else if (curItem.identifier === 'education') {
+        } else if (!selService.serviceID.includes('waec')) {
           selectContact?.biller?.length >= 10 && verifyNumber();
         }
       })();
@@ -158,7 +158,9 @@ const Services = ({navigation, route}: {navigation: any; route: any}) => {
                   Coudn't find
                   {curItem.identifier == 'tv-subscription'
                     ? ' IUC '
-                    : ' Meter '}
+                    : curItem.identifier.includes('elect')
+                    ? 'Meter'
+                    : 'Profile'}
                   information.
                 </Text>
                 <Button
@@ -349,25 +351,26 @@ const Services = ({navigation, route}: {navigation: any; route: any}) => {
       contact: {emails, givenName},
       selectedPhone: {number},
     } = await selectContactPhone();
+
     setContact({
       ...selectContact,
       email: emails[0],
-      biller: curItem.identifier == 'data' ? number : selectContact.biller,
+      biller:
+        curItem.identifier == 'data' &&
+        selService.serviceID.includes('waec') &&
+        number,
       name: givenName,
       phone: number,
     });
-
-    console.debug(number);
   };
 
-  const mainNumberSelectorFunc = async () => {
+  const selectBiller = async () => {
     let {
       selectedPhone: {number},
     } = await selectContactPhone();
     setContact({
       ...selectContact,
       biller: number,
-      phone: curItem.identifier == 'data' ? number : selectContact.biller,
     });
   };
 
@@ -399,7 +402,7 @@ const Services = ({navigation, route}: {navigation: any; route: any}) => {
         }
       }
       // designation number validation
-      if (!selectContact.biller) {
+      if (!showPhoneInputForData && !selectContact.biller) {
         setMsg({
           ...msg,
           msg: 'Designation number is required!',
@@ -485,6 +488,11 @@ const Services = ({navigation, route}: {navigation: any; route: any}) => {
     curItem.identifier === 'tv-subscription'
       ? selService.serviceID != ''
       : selServiceVar.variation_code != '';
+
+  let showPhoneInputForData =
+    curItem.identifier == 'data' ||
+    (selService.serviceID.includes('waec') &&
+      curItem.identifier === 'education');
 
   return (
     <>
@@ -642,106 +650,108 @@ const Services = ({navigation, route}: {navigation: any; route: any}) => {
                           }
                         />
                       </View>
-                      {curItem.identifier !== 'data' && (
-                        <TextInput
-                          onChangeText={text =>
-                            setContact({...selectContact, phone: text})
-                          }
-                          value={
-                            selectContact.phone
-                              ? selectContact.phone
-                              : (selectContact.phone = user.other)
-                          }
-                          placeholder="Phone..."
-                          label="Phone"
-                          returnKeyType="next"
-                          style={css.phoneInput}
-                          outlineColor={sec}
-                          activeUnderlineColor={pry}
-                          textColor={pry}
-                          placeholderTextColor={pry}
-                          selectionColor={click}
-                          keyboardType="phone-pad"
-                          right={
-                            <TextInput.Icon
-                              icon="cellphone"
-                              iconColor={sec}
-                              style={[styles.bround, {backgroundColor: pry}]}
-                              size={32}
-                              onPress={contactFunc}
-                            />
-                          }
-                        />
-                      )}
+                      <TextInput
+                        onChangeText={text =>
+                          showPhoneInputForData
+                            ? setContact({
+                                ...selectContact,
+                                phone: text,
+                                biller: text,
+                              })
+                            : setContact({...selectContact, phone: text})
+                        }
+                        value={selectContact.phone}
+                        placeholder="Phone..."
+                        label="Phone"
+                        returnKeyType="next"
+                        style={css.phoneInput}
+                        outlineColor={sec}
+                        activeUnderlineColor={pry}
+                        textColor={pry}
+                        placeholderTextColor={pry}
+                        selectionColor={click}
+                        keyboardType="phone-pad"
+                        right={
+                          <TextInput.Icon
+                            icon="cellphone"
+                            iconColor={sec}
+                            style={[styles.bround, {backgroundColor: pry}]}
+                            size={32}
+                            onPress={contactFunc}
+                          />
+                        }
+                      />
                       <View>
-                        <TextInput
-                          disabled={
-                            curItem.identifier != 'data'
-                              ? false
-                              : selServiceVar?.variation_amount == ''
-                              ? true
-                              : false
-                          }
-                          onChangeText={text =>
-                            setContact({
-                              ...selectContact,
-                              biller: text,
-                              phone:
-                                curItem.identifier === 'data'
-                                  ? text
-                                  : selectContact.phone,
-                            })
-                          }
-                          value={
-                            selectContact.biller
-                              ? selectContact.biller
-                              : (selectContact.biller = user?.phone)
-                          }
-                          placeholder={
-                            curItem.identifier.includes('data')
-                              ? 'Phone number...'
-                              : curItem.identifier.includes('tv')
-                              ? 'SmartCard Number'
-                              : curItem.identifier.includes('electricity')
-                              ? 'Meter Number'
-                              : curItem.identifier.includes('education') &&
-                                'Profile ID'
-                          }
-                          label={
-                            selService.serviceID.includes('data')
-                              ? 'Phone'
-                              : curItem.identifier.includes('tv')
-                              ? 'SmartCard Number'
-                              : curItem.identifier.includes('electricity')
-                              ? 'Meter Number'
-                              : curItem.identifier.includes('education') &&
-                                'Profile ID'
-                          }
-                          keyboardType="number-pad"
-                          style={css.phoneInput}
-                          outlineColor={sec}
-                          activeUnderlineColor={pry}
-                          textColor={pry}
-                          placeholderTextColor={pry}
-                          selectionColor={click}
-                          right={
-                            <TextInput.Icon
-                              icon={
-                                curItem.identifier.includes('tv')
-                                  ? 'smart-card-outline'
-                                  : curItem.identifier.includes('elect')
-                                  ? 'speedometer'
-                                  : curItem.identifier.includes('education')
-                                  ? 'card-account-details-outline'
-                                  : 'cellphone'
-                              }
-                              iconColor={sec}
-                              style={[styles.bround, {backgroundColor: pry}]}
-                              size={32}
-                              onPress={mainNumberSelectorFunc}
-                            />
-                          }
-                        />
+                        {!showPhoneInputForData && (
+                          <TextInput
+                            disabled={
+                              curItem.identifier != 'data'
+                                ? false
+                                : selServiceVar?.variation_amount == ''
+                                ? true
+                                : false
+                            }
+                            onChangeText={text =>
+                              setContact({
+                                ...selectContact,
+                                biller: text,
+                                phone:
+                                  curItem.identifier === 'data'
+                                    ? text
+                                    : selectContact.phone,
+                              })
+                            }
+                            value={
+                              selectContact.biller
+                                ? selectContact.biller
+                                : (selectContact.biller = user?.phone)
+                            }
+                            placeholder={
+                              curItem.identifier.includes('data')
+                                ? 'Phone number...'
+                                : curItem.identifier.includes('tv')
+                                ? 'SmartCard Number'
+                                : curItem.identifier.includes('electricity')
+                                ? 'Meter Number'
+                                : curItem.identifier.includes('education') &&
+                                  'Profile ID'
+                            }
+                            label={
+                              selService.serviceID.includes('data')
+                                ? 'Phone'
+                                : curItem.identifier.includes('tv')
+                                ? 'SmartCard Number'
+                                : curItem.identifier.includes('electricity')
+                                ? 'Meter Number'
+                                : curItem.identifier.includes('education') &&
+                                  'Profile ID'
+                            }
+                            keyboardType="number-pad"
+                            style={css.phoneInput}
+                            outlineColor={sec}
+                            activeUnderlineColor={pry}
+                            textColor={pry}
+                            placeholderTextColor={pry}
+                            selectionColor={click}
+                            right={
+                              <TextInput.Icon
+                                icon={
+                                  curItem.identifier.includes('tv')
+                                    ? 'smart-card-outline'
+                                    : curItem.identifier.includes('elect')
+                                    ? 'speedometer'
+                                    : curItem.identifier.includes('education')
+                                    ? 'card-account-details-outline'
+                                    : 'cellphone'
+                                }
+                                iconColor={sec}
+                                style={[styles.bround, {backgroundColor: pry}]}
+                                size={32}
+                                onPress={selectBiller}
+                              />
+                            }
+                          />
+                        )}
                         {userInfo.loading && (
                           <View
                             style={[

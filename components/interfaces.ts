@@ -132,6 +132,11 @@ interface TransactionDate {
   timezone: string;
 }
 
+interface Cards {
+  Serial: string;
+  Pin: string;
+}
+
 export interface TransactionResponse {
   code: string;
   content: {
@@ -146,6 +151,7 @@ export interface TransactionResponse {
   customerAddress: string;
   token: string;
   tokenAmount: number;
+  tokens: string;
   exchangeReference: number;
   resetToken: null;
   configureToken: null;
@@ -153,4 +159,6 @@ export interface TransactionResponse {
   fixChargeAmount: null;
   tariff: string;
   taxAmount: null;
+  cards: Cards[];
+  Pin: string;
 }

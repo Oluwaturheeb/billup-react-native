@@ -14,7 +14,7 @@ import {
 import {bg, pry, bod, sec, click} from './colors';
 import axios from './lib/axios';
 import {useUser} from './lib/context';
-import {money, updateFirebase} from './lib/firestore';
+import {chunk, adminTransaction, money, updateFirebase} from './lib/firestore';
 import {transactionResponse} from './schema';
 import styles from './styles';
 
@@ -25,6 +25,8 @@ const TransactionDetails = ({route}: {route: any}) => {
   const [status, setStatus] = useState(transactionResponse);
   const [info, setInfo] = useState({show: false, msg: '', type: false});
   const [swap, setSwap] = useState(false);
+
+  console.log(status.content.transactions.commission);
 
   let beneficiaryType = tInfo?.name;
   // date problem
@@ -44,9 +46,7 @@ const TransactionDetails = ({route}: {route: any}) => {
       setTimeout(() => setSwap(true), 5000);
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [status?.code]);
-
-  console.log(info);
+  }, [status.code]);
 
   const transBtnFunc = async () => {
     setBtn(true);
@@ -74,21 +74,24 @@ const TransactionDetails = ({route}: {route: any}) => {
               req?.msg && ' ' + req.msg
             }.`;
 
-      updateFirebase(
-        id,
-        req?.code === '000' ? Number(total) : 0,
-        {
-          title: tInfo?.name + ' ' + money(total),
-          desc: msg,
-          status: req?.code === '000' ? 'success' : 'failed',
-          amount: Number(total),
-          info: req,
-          createdAt: new Date(),
-        },
-        false,
-      );
+      let log = {
+        title: tInfo?.name + ' ' + money(total),
+        desc: msg,
+        status: req?.code === '000' ? 'success' : 'failed',
+        amount: Number(total),
+        info: req,
+        createdAt: new Date(),
+      };
 
-      console.log(JSON.stringify(req));
+      updateFirebase(id, req?.code === '000' ? Number(total) : 0, log, false);
+      await adminTransaction(
+        {
+          id,
+          transaction: req,
+          commission: req.content.transactions.commission,
+        },
+        'transaction',
+      );
       setStatus(req);
       setInfo({
         show: true,
@@ -109,6 +112,69 @@ const TransactionDetails = ({route}: {route: any}) => {
       </Text>
       <TransactionSummary />
       <View style={{marginTop: 10, marginBottom: 20}}>
+        {status.code === '000' && (
+          <>
+            {tInfo.userInfo.Customer_Name != undefined && (
+              <View
+                style={[
+                  styles.frow,
+                  styles.fspace,
+                  styles.p2,
+                  {
+                    backgroundColor: sec,
+                    marginVertical: 2,
+                    alignItems: 'center',
+                  },
+                ]}>
+                <Text style={{color: pry}} variant="bodySmall">
+                  Token
+                </Text>
+                {status.token && (
+                  <Text
+                    variant="bodyLarge"
+                    style={{textAlign: 'center', color: click}}>
+                    {chunk(status.token.split(': ')[1])}
+                  </Text>
+                )}
+                {status.tokens && (
+                  <Text
+                    variant="bodyLarge"
+                    style={{textAlign: 'center', color: click}}>
+                    {chunk(status.tokens[0])}
+                  </Text>
+                )}
+                {status.Pin && (
+                  <Text
+                    variant="bodyLarge"
+                    style={{textAlign: 'center', color: click}}>
+                    {chunk(status.Pin.split(': ')[1])}
+                  </Text>
+                )}
+              </View>
+            )}
+            {data.serviceID == 'waec' && status.cards && (
+              <View
+                style={[styles.p2, {backgroundColor: sec, marginVertical: 2}]}>
+                <View style={[styles.frow, styles.fspace]}>
+                  <Text style={{color: pry}} variant="bodySmall">
+                    Serial
+                  </Text>
+                  <Text style={{color: pry}} variant="bodySmall">
+                    {chunk(status.cards[0].Serial)}
+                  </Text>
+                </View>
+                <View style={[styles.frow, styles.fspace]}>
+                  <Text style={{color: pry}} variant="bodySmall">
+                    Pin
+                  </Text>
+                  <Text style={{color: pry}} variant="bodySmall">
+                    {chunk(status.cards[0].Pin)}
+                  </Text>
+                </View>
+              </View>
+            )}
+          </>
+        )}
         <View
           style={[
             styles.frow,
@@ -148,7 +214,9 @@ const TransactionDetails = ({route}: {route: any}) => {
             Designation
           </Text>
           <Text style={{color: pry}} variant="bodySmall">
-            {details.phone}
+            {tInfo.userInfo.Customer_Name != undefined
+              ? data.billersCode
+              : details.phone}
           </Text>
         </View>
         <View
@@ -421,7 +489,14 @@ const TransactionDetails = ({route}: {route: any}) => {
           {beneficiaryType}
         </Text>
       </View>
-      <View style={[styles.fcenter]}>
+      <View style={[styles.fcenter, styles.frow, {flex: 1}]}>
+        <Button
+          style={{margin: 5}}
+          labelStyle={{color: pry}}
+          mode="outlined"
+          onPress={() => setSwap(!swap)}>
+          Close
+        </Button>
         <Button
           icon="account-plus"
           style={{backgroundColor: pry, margin: 5}}
@@ -541,39 +616,3 @@ const css = StyleSheet.create({
 });
 
 export default TransactionDetails;
-/* const i = {
-  amount: '1530.00',
-  code: '000',
-  content: {
-    transactions: {
-      amount: 1530,
-      channel: 'api',
-      commission: 69,
-      convinience_fee: 0,
-      discount: null,
-      email: 'admin@gmail.com',
-      method: 'api',
-      name: null,
-      phone: '08090909090',
-      platform: 'api',
-      product_name: 'Smile Payment',
-      quantity: 1,
-      service_verification: null,
-      status: 'delivered',
-      total_amount: 1461.15,
-      transactionId: '16739677512965559818382572',
-      type: 'Data Services',
-      unique_element: '08011111111',
-      unit_price: 1530,
-    },
-  },
-  purchased_code: '',
-  requestId: '20230117162351',
-  response_description: 'TRANSACTION SUCCESSFUL',
-  transaction_date: {
-    date: '2023-01-17 16:02:31.000000',
-    timezone: 'Africa/Lagos',
-    timezone_type: 3,
-  },
-};
- */

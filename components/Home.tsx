@@ -21,7 +21,7 @@ import {click, pry, sec} from './colors';
 import styles from './styles';
 import {FlatList, Gesture, GestureDetector} from 'react-native-gesture-handler';
 import {Network} from './services/Components';
-import {money, ref, updateFirebase} from './lib/firestore';
+import {adminTransaction, money, ref, updateFirebase} from './lib/firestore';
 import LinearGradient from 'react-native-linear-gradient';
 import PayWithFlutterwave from 'flutterwave-react-native';
 import Animated, {
@@ -32,6 +32,7 @@ import Animated, {
 import {useUser} from './lib/context';
 import {homeData} from './schema';
 import {ContentProp, Logs} from './interfaces';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 // import {Notifications} from 'react-native-notifications';
 
 const height = Dimensions.get('screen').height;
@@ -91,6 +92,7 @@ const Home = ({navigation}: {navigation: any}) => {
           identifier: 'education',
           name: 'Education',
         },
+        /* 
         {
           identifier: 'funds',
           name: 'Funds',
@@ -106,13 +108,15 @@ const Home = ({navigation}: {navigation: any}) => {
         {
           identifier: 'insurance',
           name: 'Insurance',
-        },
+        }, */
       ],
     });
 
     // request contact reading permission
     (async () => {
       await PermissionsAndroid.request('android.permission.READ_CONTACTS');
+      let item = await AsyncStorage.getItem('show');
+      if (item) setShow(item == 'show' ? true : false);
     })();
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
@@ -217,6 +221,12 @@ const Home = ({navigation}: {navigation: any}) => {
     </View>
   );
 
+  useEffect(() => {
+    (async () => {
+      await AsyncStorage.setItem('show', !show ? 'show' : 'hide');
+    })();
+  }, [show]);
+
   const Services = () => {
     const others: ContentProp[] = [];
     const transY = useSharedValue(0);
@@ -305,7 +315,7 @@ const Home = ({navigation}: {navigation: any}) => {
             size={30}
             style={{marginVertical: -10}}
           />
-          <View>
+          <View style={{flex: 1}}>
             <Text variant="bodyLarge">{item.title}</Text>
             <Text variant="bodyMedium">{item.desc}</Text>
           </View>
@@ -339,7 +349,7 @@ const Home = ({navigation}: {navigation: any}) => {
             style={[
               {
                 width: 100,
-                backgroundColor: MD2Colors.grey300,
+                backgroundColor: pry + '88',
                 height: 4,
                 alignSelf: 'center',
                 marginTop: -16,
@@ -424,19 +434,16 @@ const Home = ({navigation}: {navigation: any}) => {
                 </Button>
                 <PayWithFlutterwave
                   onRedirect={async e => {
-                    updateFirebase(
-                      id,
-                      topUp.value - 50,
-                      {
-                        title: 'Wallet Topup',
-                        desc: 'Wallet topup of ' + money(topUp.value),
-                        status: e.status == 'successful' ? 'success' : 'failed',
-                        amount: e.status == 'successful' ? topUp.value : 0,
-                        info: e,
-                        createdAt: new Date(),
-                      },
-                      true,
-                    );
+                    let log = {
+                      title: 'Wallet Topup',
+                      desc: 'Wallet topup of ' + money(topUp.value),
+                      status: e.status == 'successful' ? 'success' : 'failed',
+                      amount: e.status == 'successful' ? topUp.value : 0,
+                      info: e,
+                      createdAt: new Date(),
+                    };
+                    await updateFirebase(id, topUp.value - 50, log, true);
+                    await adminTransaction({id, info: log});
 
                     // update the user
                     setUser({
