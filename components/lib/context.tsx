@@ -10,17 +10,6 @@ const UserProvider = ({children}: {children: any}) => {
   let [user, setUser] = useState(UserSchema);
   let [id, setId] = useState('');
 
-  // useEffect(() => {
-  //   (async () => {
-  //     let dbId = await AsyncStorage.getItem('id');
-  //     if (dbId != null) {
-  //       setId(dbId);
-  //       let userInfo = await (await users.doc(dbId).get()).data();
-  //       setUser(userInfo);
-  //     }
-  //   })();
-  // }, []);
-
   useEffect(() => {
     const subscriber = (async () => {
       let appId = await AsyncStorage.getItem('id');

@@ -1,6 +1,7 @@
 /* eslint-disable @typescript-eslint/no-shadow */
+import AsyncStorage from '@react-native-async-storage/async-storage';
 import React, {useState, useEffect} from 'react';
-import {StyleSheet, View} from 'react-native';
+import {Modal, StyleSheet, TouchableOpacity, View} from 'react-native';
 import {ScrollView} from 'react-native-gesture-handler';
 import LinearGradient from 'react-native-linear-gradient';
 import {
@@ -24,9 +25,7 @@ const TransactionDetails = ({route}: {route: any}) => {
   const [btn, setBtn] = useState(false);
   const [status, setStatus] = useState(transactionResponse);
   const [info, setInfo] = useState({show: false, msg: '', type: false});
-  const [swap, setSwap] = useState(false);
-
-  console.log(status.content.transactions.commission);
+  const [swap, setSwap] = useState(true);
 
   let beneficiaryType = tInfo?.name;
   // date problem
@@ -66,6 +65,7 @@ const TransactionDetails = ({route}: {route: any}) => {
           status: 'failed',
         };
       }
+      console.log(req);
 
       let msg =
         req?.code === '000'
@@ -82,13 +82,12 @@ const TransactionDetails = ({route}: {route: any}) => {
         info: req,
         createdAt: new Date(),
       };
-
       updateFirebase(id, req?.code === '000' ? Number(total) : 0, log, false);
       await adminTransaction(
         {
           id,
-          transaction: req,
-          commission: req.content.transactions.commission,
+          transaction: log,
+          commission: req?.content?.transactions.commission | 0,
         },
         'transaction',
       );
@@ -107,50 +106,88 @@ const TransactionDetails = ({route}: {route: any}) => {
 
   const TransactionInfo = () => (
     <>
-      <Text variant="titleLarge" style={{marginBottom: 7, textAlign: 'center'}}>
-        Transaction Details
-      </Text>
       <TransactionSummary />
-      <View style={{marginTop: 10, marginBottom: 20}}>
+      <View style={{marginBottom: 20}}>
         {status.code === '000' && (
           <>
-            {tInfo.userInfo.Customer_Name != undefined && (
-              <View
-                style={[
-                  styles.frow,
-                  styles.fspace,
-                  styles.p2,
-                  {
-                    backgroundColor: sec,
-                    marginVertical: 2,
-                    alignItems: 'center',
-                  },
-                ]}>
-                <Text style={{color: pry}} variant="bodySmall">
-                  Token
-                </Text>
-                {status.token && (
-                  <Text
-                    variant="bodyLarge"
-                    style={{textAlign: 'center', color: click}}>
-                    {chunk(status.token.split(': ')[1])}
+            {tInfo.userInfo?.Customer_Name != undefined && (
+              <>
+                <View
+                  style={[
+                    styles.frow,
+                    styles.fspace,
+                    styles.p2,
+                    {
+                      backgroundColor: sec,
+                      marginVertical: 2,
+                      alignItems: 'center',
+                    },
+                  ]}>
+                  <Text style={{color: pry}} variant="bodySmall">
+                    Token
                   </Text>
+                  {status.purchased_code && (
+                    <Text
+                      variant="bodyLarge"
+                      style={{textAlign: 'center', color: click}}>
+                      {chunk(status.purchased_code.split(': ')[1])}
+                    </Text>
+                  )}
+                </View>
+                {status?.bonusToken && (
+                  <>
+                    <View
+                      style={[
+                        styles.frow,
+                        styles.fspace,
+                        styles.p2,
+                        {
+                          backgroundColor: sec,
+                          marginVertical: 2,
+                          alignItems: 'center',
+                        },
+                      ]}>
+                      <Text style={{color: pry}} variant="bodySmall">
+                        Bonus Token
+                      </Text>
+                      <Text
+                        variant="bodyLarge"
+                        style={{textAlign: 'center', color: click}}>
+                        {chunk(status.purchased_code.split(': ')[1])}
+                      </Text>
+                    </View>
+                    <View
+                      style={[
+                        styles.frow,
+                        styles.fspace,
+                        styles.p2,
+                        {
+                          backgroundColor: sec,
+                          marginVertical: 2,
+                          alignItems: 'center',
+                        },
+                      ]}>
+                      <Text style={{color: pry}} variant="bodySmall">
+                        Bonus Token Amount
+                      </Text>
+                      {status && (
+                        <Text
+                          variant="bodyLarge"
+                          style={{textAlign: 'center', color: click}}>
+                          {status.bonusTokenAmount}
+                        </Text>
+                      )}
+                      {status.Pin && (
+                        <Text
+                          variant="bodyLarge"
+                          style={{textAlign: 'center', color: click}}>
+                          {chunk(status.Pin.split(': ')[1])}
+                        </Text>
+                      )}
+                    </View>
+                  </>
                 )}
-                {status.tokens && (
-                  <Text
-                    variant="bodyLarge"
-                    style={{textAlign: 'center', color: click}}>
-                    {chunk(status.tokens[0])}
-                  </Text>
-                )}
-                {status.Pin && (
-                  <Text
-                    variant="bodyLarge"
-                    style={{textAlign: 'center', color: click}}>
-                    {chunk(status.Pin.split(': ')[1])}
-                  </Text>
-                )}
-              </View>
+              </>
             )}
             {data.serviceID == 'waec' && status.cards && (
               <View
@@ -214,7 +251,7 @@ const TransactionDetails = ({route}: {route: any}) => {
             Designation
           </Text>
           <Text style={{color: pry}} variant="bodySmall">
-            {tInfo.userInfo.Customer_Name != undefined
+            {tInfo.userInfo?.Customer_Name != undefined
               ? data.billersCode
               : details.phone}
           </Text>
@@ -377,7 +414,7 @@ const TransactionDetails = ({route}: {route: any}) => {
             </View>
           </>
         )}
-        {!tInfo.type && (
+        {tInfo.type && (
           <Button
             mode="contained"
             disabled={btn}
@@ -396,7 +433,7 @@ const TransactionDetails = ({route}: {route: any}) => {
       <LinearGradient
         colors={[pry + 'dd', pry]}
         end={{x: 1, y: 0}}
-        style={{borderRadius: 10, padding: 10}}>
+        style={{borderRadius: 10, padding: 10, marginVertical: 10}}>
         <View style={[styles.frow, styles.fcenter]}>
           <Avatar.Image source={{uri: tInfo.image}} size={36} />
           <Text
@@ -469,7 +506,15 @@ const TransactionDetails = ({route}: {route: any}) => {
   };
 
   const SwapView = () => (
-    <View style={[{marginTop: '50%'}]}>
+    <View
+      style={{
+        backgroundColor: MD2Colors.grey200,
+        padding: 20,
+        width: '100%',
+        borderRadius: 5,
+        height: '30%',
+        top: '30%',
+      }}>
       <Text
         variant="titleLarge"
         style={{
@@ -507,12 +552,45 @@ const TransactionDetails = ({route}: {route: any}) => {
     </View>
   );
 
+  const BeneficiaryModal = () => {
+    useEffect(() => {
+      (async () => {
+        let type = await AsyncStorage.getItem(tInfo.type);
+        if (type) {
+          let parseType: [] = JSON.parse(data);
+          parseType.filter((item, index) => {
+            console.log(item, index);
+          });
+        }
+      })();
+      // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, []);
+
+    return (
+      <Modal
+        visible={swap}
+        animationType="slide"
+        onDismiss={() => setSwap(!swap)}
+        transparent={true}>
+        <TouchableOpacity
+          style={{
+            height: '100%',
+            backgroundColor: 'rgba(0, 0, 0, .3)',
+            padding: 20,
+          }}>
+          <SwapView />
+        </TouchableOpacity>
+      </Modal>
+    );
+  };
+
   return (
     <LinearGradient
       colors={[sec + '44', sec + 'aa']}
       style={{flex: 1, paddingHorizontal: 10}}>
       <ScrollView showsVerticalScrollIndicator={false}>
-        {swap ? <SwapView /> : <TransactionInfo />}
+        {/* {swap && <BeneficiaryModal />} */}
+        <TransactionInfo />
       </ScrollView>
       {info.show && (
         <View

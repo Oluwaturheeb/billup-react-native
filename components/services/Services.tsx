@@ -438,6 +438,7 @@ const Services = ({navigation, route}: {navigation: any; route: any}) => {
             userInfo: userInfo.data.content,
             action: userAction.action === 'new' ? 'change' : 'renew',
             varName: selServiceVar.name,
+            type: curItem.identifier,
             total,
           },
           data: {

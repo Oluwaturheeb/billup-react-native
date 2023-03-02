@@ -161,4 +161,13 @@ export interface TransactionResponse {
   taxAmount: null;
   cards: Cards[];
   Pin: string;
+  mainToken: string;
+  bonusToken: string;
+  bonusTokenAmount: any;
+}
+
+export interface AdminData {
+  commission: number;
+  payments: Logs[];
+  transactions: TransactionResponse[];
 }

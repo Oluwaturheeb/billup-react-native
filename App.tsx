@@ -24,6 +24,8 @@ import LinearGradient from 'react-native-linear-gradient';
 import {money} from './components/lib/firestore';
 import {UserProvider, useUser} from './components/lib/context';
 import Logs from './components/Logs';
+import Admin from './components/Admin';
+import CustomerProfile from './components/CustomerProfile';
 
 const App = () => {
   const Stack = createNativeStackNavigator();
@@ -39,6 +41,11 @@ const App = () => {
         style={{position: 'relative', height: '100%'}}>
         <LinearGradient colors={[pry + 'cc', pry + 'dd']} style={{height: 120}}>
           <View style={[styles.frow, {padding: 8}]}>
+            <IconButton
+              style={{marginVertical: -10, position: 'absolute', top: 10, right: 10, elevation: 1}}
+              iconColor={sec}
+              icon="account-cog"
+            />
             {user.photo !== '' && (
               <Avatar.Image source={{uri: user.photo}} size={48} />
             )}
@@ -67,6 +74,23 @@ const App = () => {
             {money(user.balance)}
           </Text>
         </LinearGradient>
+        <TouchableRipple
+          rippleColor={pry + '44'}
+          onPress={() => {
+            nav.navigate('Admin');
+            navRef.current.closeDrawer();
+          }}>
+          <View style={[styles.frow, styles.fVertCenter, styles.p2]}>
+            <IconButton
+              style={{marginVertical: -10}}
+              iconColor={pry}
+              icon="account-lock"
+            />
+            <Text variant="bodySmall" style={{color: pry}}>
+              Admin Panel
+            </Text>
+          </View>
+        </TouchableRipple>
         <TouchableRipple
           rippleColor={pry + '44'}
           onPress={() => {
@@ -146,7 +170,7 @@ const App = () => {
                 style={{marginVertical: 10}}
               />
               <Text variant="titleMedium" style={{color: sec + 'ff'}}>
-                {props.route.name}
+                {props.options.title}
               </Text>
             </View>
             <View style={[styles.frow]}>
@@ -187,6 +211,11 @@ const App = () => {
                 header: (props: any) => <Headers props={props} />,
               }}>
               <Stack.Screen
+                name="Admin"
+                component={Admin}
+                options={{title: 'Admin panel'}}
+              />
+              <Stack.Screen
                 name="Welcome"
                 component={Welcome}
                 options={{headerShown: false}}
@@ -199,9 +228,13 @@ const App = () => {
               <Stack.Screen
                 name="Services"
                 component={Services}
-                // options={{headerShown: false}}
+                options={{title: 'Services'}}
               />
-              <Stack.Screen name="Airtime" component={Airtime} />
+              <Stack.Screen
+                name="Airtime"
+                component={Airtime}
+                options={{title: 'Airtime'}}
+              />
               <Stack.Screen
                 name="TransactionDetails"
                 component={TransactionDetails}
@@ -213,6 +246,13 @@ const App = () => {
                 options={{
                   headerTitle: 'Transaction History',
                   title: 'Transaction History',
+                }}
+              />
+              <Stack.Screen
+                name="CustomerProfile"
+                component={CustomerProfile}
+                options={{
+                  title: 'Customer Profile',
                 }}
               />
             </Stack.Navigator>

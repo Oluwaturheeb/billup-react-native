@@ -11,6 +11,7 @@ import {
   Variation,
   Operator,
   TransactionResponse,
+  AdminData,
 } from './interfaces';
 
 export const UserSchema: User = {
@@ -145,6 +146,9 @@ export const transactionResponse: TransactionResponse = {
     },
   ],
   Pin: '',
+  bonusToken: '',
+  bonusTokenAmount: '',
+  mainToken: '',
 };
 
 export const logs: Logs = {
@@ -154,4 +158,10 @@ export const logs: Logs = {
   title: '',
   status: '',
   amount: 0,
+};
+
+export const adminData: AdminData = {
+  commission: 0,
+  transactions: [transactionResponse],
+  payments: [logs],
 };

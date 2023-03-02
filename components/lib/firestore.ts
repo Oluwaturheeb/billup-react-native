@@ -51,16 +51,16 @@ export const adminTransaction = async (data: any, which = 'Payment') => {
     which != 'Payment'
       ? {
           commission: field.increment(data.commission),
-          transactions: {
+          transactions: field.arrayUnion({
             id: data.id,
-            transaction: field.arrayUnion(data.transaction),
-          },
+            transaction: data.transaction,
+          }),
         }
       : {
-          payments: {
+          payments: field.arrayUnion({
             id: data.id,
             transaction: data.info,
-          },
+          }),
         };
   await users.doc('PXlO3KDmrEwbDTwsprSM').update(obj);
 };

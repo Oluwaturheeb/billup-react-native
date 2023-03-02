@@ -104,6 +104,7 @@ const Airtime = ({navigation, route}: {navigation: any; route: any}) => {
         email: emails[0],
         biller: number,
         name: givenName,
+        phone: number,
       });
     };
 
@@ -206,6 +207,7 @@ const Airtime = ({navigation, route}: {navigation: any; route: any}) => {
             xtra: cFee,
             name: selectedService.name,
             serviceID: selectedService.serviceID,
+            type: curItem.identifier,
             total,
             foreign: {
               service: fData.operator.name,
@@ -336,7 +338,9 @@ const Airtime = ({navigation, route}: {navigation: any; route: any}) => {
             />
           </View>
           <TextInput
-            onChangeText={text => setContact({...selectContact, biller: text})}
+            onChangeText={text =>
+              setContact({...selectContact, biller: text, phone: text})
+            }
             value={
               selectContact.biller
                 ? selectContact.biller
@@ -432,7 +436,10 @@ const Airtime = ({navigation, route}: {navigation: any; route: any}) => {
               setVarData({...varData, loading: true, operator: item});
             }
             // if mobile data
-            if (varData.operator.name && varData.variation.variation_code == 0) {
+            if (
+              varData.operator.name &&
+              varData.variation.variation_code == 0
+            ) {
               setVarData({...varData, loading: true, variation: item});
               delete varData?.loading;
               setForeignData({...varData, variation: item});
@@ -551,7 +558,7 @@ const Airtime = ({navigation, route}: {navigation: any; route: any}) => {
             },
           });
           setDataVariation({loading: false, data: req.data.content.variations});
-          // setVarData({...varData, convFee: req.data.content.convinience_fee});
+          console.log(req.data);
         })();
         // eslint-disable-next-line react-hooks/exhaustive-deps
       }, []);
@@ -623,9 +630,11 @@ const Airtime = ({navigation, route}: {navigation: any; route: any}) => {
             <ProductType />
           )}
           {varData.product.name && varData.operator.name == '' && <Operator />}
-          {//varData.product.name === 'Mobile Data' &&
+          {
+            //varData.product.name === 'Mobile Data' &&
             varData.operator.name &&
-            varData.variation.variation_amount == 0 && <DataVariation />}
+              varData.variation.variation_amount == 0 && <DataVariation />
+          }
         </View>
       </Modal>
     );

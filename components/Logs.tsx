@@ -69,7 +69,7 @@ const Logs = () => {
                     : 'close-outline'
                 }
                 iconColor={MD2Colors.grey300}
-                size={180}
+                size={150}
               />
             </View>
             <View style={{padding: 16}}>
@@ -88,43 +88,49 @@ const Logs = () => {
                 style={{textAlign: 'center', color: pry}}>
                 {data.desc}
               </Text>
-              {info.token && (
+              {!info.cards && info.purchased_code && (
                 <Text
                   variant="bodyLarge"
                   style={{textAlign: 'center', color: click}}>
-                  {chunk(info.token.split(': ')[1])}
+                  {chunk(info.purchased_code.split(': ')[1])}
                 </Text>
               )}
-              {info.tokens && (
-                <Text
-                  variant="bodyLarge"
-                  style={{textAlign: 'center', color: click}}>
-                  {chunk(info.tokens[0])}
-                </Text>
-              )}
-              {info.cards && (
-                <View
-                  style={[
-                    styles.p2,
-                    {backgroundColor: click, marginVertical: 5},
-                  ]}>
-                  <View style={[styles.frow, styles.fspace]}>
-                    <Text style={{color: MD2Colors.grey200}} variant="bodySmall">
-                      Serial
-                    </Text>
-                    <Text style={{color:  MD2Colors.grey200}} variant="bodySmall">
-                      {chunk(info.cards[0].Serial)}
-                    </Text>
-                  </View>
-                  <View style={[styles.frow, styles.fspace]}>
-                    <Text style={{color:  MD2Colors.grey200}} variant="bodySmall">
-                      Pin
-                    </Text>
-                    <Text style={{color:  MD2Colors.grey200}} variant="bodySmall">
-                      {chunk(info.cards[0].Pin)}
-                    </Text>
-                  </View>
-                </View>
+              {info.cards && info.purchased_code && (
+                <>
+                  {info.cards.map((item, index) => (
+                    <View
+                      key={index}
+                      style={[
+                        styles.p2,
+                        {backgroundColor: click, marginVertical: 2},
+                      ]}>
+                      <View style={[styles.frow, styles.fspace]}>
+                        <Text
+                          style={{color: MD2Colors.grey200}}
+                          variant="bodySmall">
+                          Serial
+                        </Text>
+                        <Text
+                          style={{color: MD2Colors.grey200}}
+                          variant="bodySmall">
+                          {chunk(item.Serial)}
+                        </Text>
+                      </View>
+                      <View style={[styles.frow, styles.fspace]}>
+                        <Text
+                          style={{color: MD2Colors.grey200}}
+                          variant="bodySmall">
+                          Pin
+                        </Text>
+                        <Text
+                          style={{color: MD2Colors.grey200}}
+                          variant="bodySmall">
+                          {chunk(item.Pin)}
+                        </Text>
+                      </View>
+                    </View>
+                  ))}
+                </>
               )}
               <View>
                 <View style={[styles.frow, styles.fspace, styles.p1]}>
