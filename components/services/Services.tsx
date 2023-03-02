@@ -250,6 +250,7 @@ const Services = ({navigation, route}: {navigation: any; route: any}) => {
     const [serviceVar, setServiceVar] = useState({
       loading: true,
       data: selectedVariation,
+      filter: [],
     });
 
     useEffect(() => {
@@ -257,7 +258,11 @@ const Services = ({navigation, route}: {navigation: any; route: any}) => {
         let req = await axios.get('/service-variations', {
           params: {serviceID: selService?.serviceID},
         });
-        setServiceVar({data: req.data.content.varations, loading: false});
+        setServiceVar({
+          ...serviceVar,
+          data: req.data.content.varations,
+          loading: false,
+        });
       })();
       // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [selService]);
@@ -303,15 +308,17 @@ const Services = ({navigation, route}: {navigation: any; route: any}) => {
                 <TextInput
                   onChangeText={text => {
                     setKey(text);
-                    filter(serviceVar.data, item => {
+                    let searchResult = filter(serviceVar.data, item => {
                       let {variation_amount, name} = item;
                       if (
                         variation_amount.includes(text) ||
                         name.includes(text)
                       ) {
-                        return item;
+                        return true;
                       }
                     });
+                    console.log(searchResult, serviceVar.data);
+                    setServiceVar({...serviceVar, filter: searchResult});
                   }}
                   value={key}
                   placeholder="Search variation..."
@@ -333,7 +340,7 @@ const Services = ({navigation, route}: {navigation: any; route: any}) => {
                   }
                 />
                 <FlatList
-                  data={serviceVar.data}
+                  data={key.length > 0 ? serviceVar.filter : serviceVar.data}
                   renderItem={({item}) => <VarItems item={item} />}
                   contentContainerStyle={{marginVertical: 20}}
                 />
@@ -861,7 +868,7 @@ const css = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
   },
-  cardText: {textAlign: 'center', marginTop: 3, color: pry},
+  cardText: {textAlign: 'center', marginTop: 3, color: pry, flex: 1},
   inputContainer: {
     padding: 20,
     borderTopLeftRadius: 20,

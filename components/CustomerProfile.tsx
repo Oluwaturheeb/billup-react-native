@@ -21,7 +21,7 @@ import {click, pry, sec} from './colors';
 import styles from './styles';
 import {FlatList, Gesture, GestureDetector} from 'react-native-gesture-handler';
 import {Network} from './services/Components';
-import {adminTransaction, money, ref, updateFirebase} from './lib/firestore';
+import {adminTransaction, money, ref, updateFirebase, users} from './lib/firestore';
 import LinearGradient from 'react-native-linear-gradient';
 import PayWithFlutterwave from 'flutterwave-react-native';
 import Animated, {
@@ -38,85 +38,18 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 const height = Dimensions.get('screen').height;
 const width = Dimensions.get('screen').width;
 
-const CustomerProfile = ({navigation}: {navigation: any}) => {
-  // Notifications.postLocalNotification({
-  //   title: 'Test notty',
-  //   body: 'Hello world',
-  //   // category: 'Important',
-  //   // userInfo: {},
-  //   // fireDate: new Date(),
-  // });
-  const [data, setData] = useState(homeData);
+const CustomerProfile = ({navigation, route}: {navigation: any; route: any}) => {
+  const id = route.params;
+  const [data, setData] = useState({loading: true, data: []});
   const time = new Date().getHours();
-  const {user, setUser, id} = useUser();
   const [show, setShow] = useState(true);
   const [tab, setTab] = useState({main: true, log: false});
   const [showModal, toggleModal] = useState(false);
-  const [topUp, setTopUp] = useState<{
-    msg: string;
-    value: any;
-  }>({msg: '', value: 500});
 
   useEffect(() => {
-    // reset the navigation after d welcome screen has been displayed
-    navigation.dispatch((state: any) => {
-      const routes = state.routes.filter((r: any) => r.name !== 'Welcome');
-      return CommonActions.reset({
-        ...state,
-        routes,
-        index: routes.length - 1,
-      });
-    });
-
-    // let post = await axios.get('/service-categories');
-    setData({
-      response_description: '000',
-      content: [
-        {
-          identifier: 'airtime',
-          name: 'Airtime Recharge',
-        },
-        {
-          identifier: 'data',
-          name: 'Data Services',
-        },
-        {
-          identifier: 'tv-subscription',
-          name: 'TV Subscription',
-        },
-        {
-          identifier: 'electricity-bill',
-          name: 'Electricity Bill',
-        },
-        {
-          identifier: 'education',
-          name: 'Education',
-        },
-        /* 
-        {
-          identifier: 'funds',
-          name: 'Funds',
-        },
-        {
-          identifier: 'events',
-          name: 'Events',
-        },
-        {
-          identifier: 'other-services',
-          name: 'Other Merchants/Services',
-        },
-        {
-          identifier: 'insurance',
-          name: 'Insurance',
-        }, */
-      ],
-    });
-
-    // request contact reading permission
     (async () => {
-      await PermissionsAndroid.request('android.permission.READ_CONTACTS');
-      let item = await AsyncStorage.getItem('show');
-      if (item) setShow(item == 'show' ? true : false);
+      let user = await users.doc(id).get();
+      setData({loadding: false, data: user.data()});
     })();
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
@@ -129,25 +62,13 @@ const CustomerProfile = ({navigation}: {navigation: any}) => {
           styles.fcenter,
           {marginTop: -10, marginBottom: 16},
         ]}>
-        <Avatar.Image source={{uri: user.photo}} size={48} />
+        <Avatar.Image source={{uri: data.data.photo}} size={48} />
         <View style={{marginTop: 8, marginLeft: 8}}>
-          {time < 12 && (
-            <Text variant="bodyMedium" style={css.greetingText}>
-              Good morning{user && ', ' + user.givenName}
-            </Text>
-          )}
-          {time >= 12 && time < 16 && (
-            <Text style={css.greetingText} variant="bodyMedium">
-              Good afternoon{user && ', ' + user.givenName}
-            </Text>
-          )}
-          {time >= 16 && time >= 16 && (
-            <Text style={css.greetingText} variant="bodyMedium">
-              Good evening{user && ', ' + user.givenName}
-            </Text>
-          )}
+          <Text variant="bodyMedium" style={css.greetingText}>
+            {data.data.givenName + ' ' + data.data.familyName}
+          </Text> 
           <Text variant="bodySmall" style={[css.greetingText, {fontSize: 13}]}>
-            What do you want to do today?
+          {data.data.email}
           </Text>
         </View>
       </View>
@@ -197,35 +118,11 @@ const CustomerProfile = ({navigation}: {navigation: any}) => {
         <Text
           variant="headlineMedium"
           style={{color: sec + 'ee', textAlign: 'center'}}>
-          {show
-            ? !Number.isInteger(user.balance)
-              ? money(user.balance)
-              : money(user.balance) + '.00'
-            : '******'}
+          {money(data.data.balance)}
         </Text>
-        <View style={[styles.frow, styles.fcenter]}>
-          <IconButton
-            icon="eye"
-            onPress={() => setShow(!show)}
-            iconColor={sec}
-            style={{marginVertical: -5}}
-          />
-          <IconButton
-            icon="cash-plus"
-            iconColor={sec}
-            style={{marginVertical: -5}}
-            onPress={() => toggleModal(!showModal)}
-          />
-        </View>
       </View>
     </View>
   );
-
-  useEffect(() => {
-    (async () => {
-      await AsyncStorage.setItem('show', !show ? 'show' : 'hide');
-    })();
-  }, [show]);
 
   const Services = () => {
     const others: ContentProp[] = [];
@@ -370,10 +267,10 @@ const CustomerProfile = ({navigation}: {navigation: any}) => {
         colors={[pry + 'cc', pry + 'ff', MD2Colors.green900]}
         style={{flex: 1}}>
         <Greeting />
-        {!showModal && <Services />}
+        {/* {!showModal && <Services />} */}
         <Network />
       </LinearGradient>
-      {showModal && (
+      {/* {showModal && (
         <Modal
           visible={showModal}
           animationType="slide"
@@ -496,7 +393,7 @@ const CustomerProfile = ({navigation}: {navigation: any}) => {
             </View>
           </TouchableOpacity>
         </Modal>
-      )}
+      )} */}
     </View>
   );
 };
@@ -506,6 +403,7 @@ const css = StyleSheet.create({
     padding: 12,
   },
   greetingText: {
+    marginLeft: 12,
     fontSize: 20,
     color: MD2Colors.grey300,
   },
