@@ -49,6 +49,7 @@ const Home = ({navigation}: {navigation: any}) => {
   const [data, setData] = useState(homeData);
   const time = new Date().getHours();
   const {user, setUser, id} = useUser();
+  console.log(id, user);
   const [show, setShow] = useState(true);
   const [tab, setTab] = useState({main: true, log: false});
   const [showModal, toggleModal] = useState(false);

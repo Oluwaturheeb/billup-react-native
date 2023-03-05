@@ -399,7 +399,7 @@ const Airtime = ({navigation, route}: {navigation: any; route: any}) => {
             </Text>
           )}
 
-          <Button mode="contained" style={css.button} onPress={submitForm}>
+          <Button mode="contained" style={css.button} labelStyle={{color: sec}} onPress={submitForm}>
             Continue
           </Button>
         </View>
@@ -408,7 +408,6 @@ const Airtime = ({navigation, route}: {navigation: any; route: any}) => {
   };
 
   const ServiceVariationModal = () => {
-    const [key, setKey] = useState('');
     const [varData, setVarData] = useState({
       loading: true,
       country: foreignAirtimeCountries,
@@ -458,14 +457,21 @@ const Airtime = ({navigation, route}: {navigation: any; route: any}) => {
     };
 
     const Country = () => {
+      const [key, setKey] = useState('');
       let [countries, setCountries] = useState({
         loading: true,
         data: foreignAirtimeCountries,
+        filter: [],
       });
       useEffect(() => {
         (async () => {
           let req = await axios.get('/get-international-airtime-countries');
-          setCountries({loading: false, data: req.data.content.countries});
+          setCountries({
+            ...countries,
+            loading: false,
+            data: req.data.content.countries,
+          });
+          console.log(JSON.stringify(req.data, null, 1));
         })();
         // eslint-disable-next-line react-hooks/exhaustive-deps
       }, []);
@@ -475,18 +481,62 @@ const Airtime = ({navigation, route}: {navigation: any; route: any}) => {
           {countries.loading ? (
             <MiniLoader />
           ) : (
-            <FlatList
-              data={countries.data}
-              renderItem={({item}) => <VarItems item={item} />}
-              contentContainerStyle={{marginVertical: 20}}
-            />
+            <>
+              <TextInput
+                onChangeText={text => {
+                  setKey(text);
+                  let searchResult = filter(countries.data, item => {
+                    let {name, code, currency} = item;
+                    if (
+                      name.toLowerCase().includes(text) ||
+                      code.toLowerCase().includes(text) ||
+                      currency.toLowerCase().includes(text)
+                    ) {
+                      return true;
+                    }
+                  });
+
+                  setCountries({
+                    ...countries,
+                    filter: searchResult,
+                  });
+                }}
+                value={key}
+                placeholder="Search variation..."
+                label="Search"
+                style={{backgroundColor: 'transparent'}}
+                outlineColor={sec}
+                activeUnderlineColor={sec}
+                underlineColor={sec}
+                textColor={sec}
+                placeholderTextColor={sec}
+                selectionColor={click}
+                left={
+                  <TextInput.Icon
+                    icon="flag"
+                    iconColor={sec}
+                    style={[styles.bround, {backgroundColor: pry}]}
+                  />
+                }
+              />
+              <FlatList
+                data={!key ? countries.data : countries.filter}
+                renderItem={({item}) => <VarItems item={item} />}
+                contentContainerStyle={{marginVertical: 20}}
+              />
+            </>
           )}
         </>
       );
     };
 
     const ProductType = () => {
-      const [product, setProduct] = useState({data: [], loading: true});
+      const [key, setKey] = useState('');
+      const [product, setProduct] = useState({
+        filter: [],
+        data: [],
+        loading: true,
+      });
       useEffect(() => {
         (async () => {
           let req = await axios.get(
@@ -494,6 +544,7 @@ const Airtime = ({navigation, route}: {navigation: any; route: any}) => {
               varData.country.code,
           );
           setProduct({loading: false, data: req.data.content});
+          console.log(JSON.stringify(req.data, null, 1));
         })();
         // eslint-disable-next-line react-hooks/exhaustive-deps
       }, []);
@@ -503,18 +554,58 @@ const Airtime = ({navigation, route}: {navigation: any; route: any}) => {
           {product.loading ? (
             <MiniLoader />
           ) : (
-            <FlatList
-              data={product.data}
-              renderItem={({item}) => <VarItems item={item} />}
-              contentContainerStyle={{marginVertical: 20}}
-            />
+            <>
+              <TextInput
+                onChangeText={text => {
+                  setKey(text);
+                  let searchResult = filter(product.data, item => {
+                    let {name} = item;
+                    if (name.toLowerCase().includes(text)) {
+                      return true;
+                    }
+                  });
+
+                  setProduct({
+                    ...product,
+                    filter: searchResult,
+                  });
+                }}
+                value={key}
+                placeholder="Search variation..."
+                label="Search"
+                style={{backgroundColor: 'transparent'}}
+                outlineColor={sec}
+                activeUnderlineColor={sec}
+                underlineColor={sec}
+                textColor={sec}
+                placeholderTextColor={sec}
+                selectionColor={click}
+                left={
+                  <TextInput.Icon
+                    icon="flag"
+                    iconColor={sec}
+                    style={[styles.bround, {backgroundColor: pry}]}
+                  />
+                }
+              />
+              <FlatList
+                data={!key ? product.data : product.filter}
+                renderItem={({item}) => <VarItems item={item} />}
+                contentContainerStyle={{marginVertical: 20}}
+              />
+            </>
           )}
         </>
       );
     };
 
     const Operator = () => {
-      const [operator, setOperator] = useState({data: [], loading: true});
+      const [key, setKey] = useState('');
+      const [operator, setOperator] = useState({
+        data: [],
+        loading: true,
+        filter: [],
+      });
       useEffect(() => {
         (async () => {
           let req = await axios.get('/get-international-airtime-operators', {
@@ -523,7 +614,8 @@ const Airtime = ({navigation, route}: {navigation: any; route: any}) => {
               product_type_id: varData.product.product_type_id,
             },
           });
-          setOperator({loading: false, data: req.data.content});
+          setOperator({...operator, loading: false, data: req.data.content});
+          console.log(JSON.stringify(req.data, null, 1));
         })();
         // eslint-disable-next-line react-hooks/exhaustive-deps
       }, []);
@@ -533,20 +625,57 @@ const Airtime = ({navigation, route}: {navigation: any; route: any}) => {
           {operator.loading ? (
             <MiniLoader />
           ) : (
-            <FlatList
-              data={operator.data}
-              renderItem={({item}) => <VarItems item={item} />}
-              contentContainerStyle={{marginVertical: 20}}
-            />
+            <>
+              <TextInput
+                onChangeText={text => {
+                  setKey(text);
+                  let searchResult = filter(operator.data, item => {
+                    let {name} = item;
+                    if (name.toLowerCase().includes(text)) {
+                      return true;
+                    }
+                  });
+
+                  setOperator({
+                    ...operator,
+                    filter: searchResult,
+                  });
+                }}
+                value={key}
+                placeholder="Search variation..."
+                label="Search"
+                style={{backgroundColor: 'transparent'}}
+                outlineColor={sec}
+                activeUnderlineColor={sec}
+                underlineColor={sec}
+                textColor={sec}
+                placeholderTextColor={sec}
+                selectionColor={click}
+                left={
+                  <TextInput.Icon
+                    icon="flag"
+                    iconColor={sec}
+                    style={[styles.bround, {backgroundColor: pry}]}
+                  />
+                }
+              />
+              <FlatList
+                data={!key ? operator.data : operator.filter}
+                renderItem={({item}) => <VarItems item={item} />}
+                contentContainerStyle={{marginVertical: 20}}
+              />
+            </>
           )}
         </>
       );
     };
 
     const DataVariation = () => {
+      const [key, setKey] = useState('');
       const [dataVariation, setDataVariation] = useState({
         data: [],
         loading: true,
+        filter: [],
       });
       useEffect(() => {
         (async () => {
@@ -557,8 +686,12 @@ const Airtime = ({navigation, route}: {navigation: any; route: any}) => {
               operator_id: varData.operator.operator_id,
             },
           });
-          setDataVariation({loading: false, data: req.data.content.variations});
-          console.log(req.data);
+          setDataVariation({
+            ...dataVariation,
+            loading: false,
+            data: req.data.content.variations,
+          });
+          console.log(JSON.stringify(req.data, null, 2));
         })();
         // eslint-disable-next-line react-hooks/exhaustive-deps
       }, []);
@@ -568,11 +701,49 @@ const Airtime = ({navigation, route}: {navigation: any; route: any}) => {
           {dataVariation.loading ? (
             <MiniLoader />
           ) : (
-            <FlatList
-              data={dataVariation.data}
-              renderItem={({item}) => <VarItems item={item} />}
-              contentContainerStyle={{marginVertical: 20}}
-            />
+            <>
+              <TextInput
+                onChangeText={text => {
+                  setKey(text);
+                  let searchResult = filter(dataVariation.data, item => {
+                    let {name, variation_amount} = item;
+                    if (
+                      name.toLowerCase().includes(text) ||
+                      variation_amount.includes(text)
+                    ) {
+                      return true;
+                    }
+                  });
+
+                  setDataVariation({
+                    ...dataVariation,
+                    filter: searchResult,
+                  });
+                }}
+                value={key}
+                placeholder="Search variation..."
+                label="Search"
+                style={{backgroundColor: 'transparent'}}
+                outlineColor={sec}
+                activeUnderlineColor={sec}
+                underlineColor={sec}
+                textColor={sec}
+                placeholderTextColor={sec}
+                selectionColor={click}
+                left={
+                  <TextInput.Icon
+                    icon="flag"
+                    iconColor={sec}
+                    style={[styles.bround, {backgroundColor: pry}]}
+                  />
+                }
+              />
+              <FlatList
+                data={!key ? dataVariation.data : dataVariation.filter}
+                renderItem={({item}) => <VarItems item={item} />}
+                contentContainerStyle={{marginVertical: 20}}
+              />
+            </>
           )}
         </>
       );
@@ -593,38 +764,6 @@ const Airtime = ({navigation, route}: {navigation: any; route: any}) => {
             height: '70%',
             top: '30%',
           }}>
-          <TextInput
-            /* onChangeText={text => {
-                  setKey(text);
-                  filter(varData, item => {
-                    let {variation_amount, name} = item;
-                    if (
-                      variation_amount.includes(text) ||
-                      name.includes(text)
-                    ) {
-                      return item;
-                    }
-                  });
-                }} */
-            value={key}
-            placeholder="Search variation..."
-            label="Search"
-            style={{backgroundColor: 'transparent'}}
-            outlineColor={sec}
-            activeUnderlineColor={sec}
-            underlineColor={sec}
-            textColor={sec}
-            placeholderTextColor={sec}
-            selectionColor={click}
-            left={
-              <TextInput.Icon
-                icon="flag"
-                iconColor={sec}
-                style={[styles.bround, {backgroundColor: pry}]}
-                size={32}
-              />
-            }
-          />
           {varData.country.name == '' && <Country />}
           {varData.country.name && varData.product.name == '' && (
             <ProductType />

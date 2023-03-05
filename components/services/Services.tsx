@@ -317,7 +317,6 @@ const Services = ({navigation, route}: {navigation: any; route: any}) => {
                         return true;
                       }
                     });
-                    console.log(searchResult, serviceVar.data);
                     setServiceVar({...serviceVar, filter: searchResult});
                   }}
                   value={key}
@@ -335,7 +334,6 @@ const Services = ({navigation, route}: {navigation: any; route: any}) => {
                       icon="magnify"
                       iconColor={sec}
                       style={[styles.bround, {backgroundColor: pry}]}
-                      size={32}
                     />
                   }
                 />

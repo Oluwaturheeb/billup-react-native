@@ -42,17 +42,23 @@ const App = () => {
         <LinearGradient colors={[pry + 'cc', pry + 'dd']} style={{height: 120}}>
           <View style={[styles.frow, {padding: 8}]}>
             <IconButton
-              style={{marginVertical: -10, position: 'absolute', top: 10, right: 10, elevation: 1}}
+              style={{
+                marginVertical: -10,
+                position: 'absolute',
+                top: 10,
+                right: 10,
+                elevation: 1,
+              }}
               iconColor={sec}
               icon="account-cog"
             />
-            {user.photo !== '' && (
-              <Avatar.Image source={{uri: user.photo}} size={48} />
+            {user?.photo !== '' && (
+              <Avatar.Image source={{uri: user?.photo}} size={48} />
             )}
             <Text
               variant="titleMedium"
               style={{color: MD2Colors.grey300, marginLeft: 5}}>
-              {user.name}
+              {user?.name}
             </Text>
           </View>
           <Text
@@ -71,7 +77,7 @@ const App = () => {
               textAlign: 'center',
               marginTop: -10,
             }}>
-            {money(user.balance)}
+            {money(user?.balance || 0)}
           </Text>
         </LinearGradient>
         <TouchableRipple
@@ -211,11 +217,6 @@ const App = () => {
                 header: (props: any) => <Headers props={props} />,
               }}>
               <Stack.Screen
-                name="Admin"
-                component={Admin}
-                options={{title: 'Admin panel'}}
-              />
-              <Stack.Screen
                 name="Welcome"
                 component={Welcome}
                 options={{headerShown: false}}
@@ -254,6 +255,11 @@ const App = () => {
                 options={{
                   title: 'Customer Profile',
                 }}
+              />
+              <Stack.Screen
+                name="Admin"
+                component={Admin}
+                options={{title: 'Admin panel'}}
               />
             </Stack.Navigator>
           </DrawerLayout>
