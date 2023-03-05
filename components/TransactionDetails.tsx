@@ -605,7 +605,9 @@ const TransactionDetails = ({route}: {route: any}) => {
     const [text, setText] = useState({msg: '', text: '', tries: 3});
     const fn2FA = async () => {
       console.log(text.text == user.TWOFA, text.text, text.tries);
-      if (text.tries === 0) return;
+      if (text.tries === 0) {
+        return;
+      }
       if (user.TWOFA == text.text) {
         toggleModal(!showModal);
         transBtnFunc();
@@ -624,62 +626,64 @@ const TransactionDetails = ({route}: {route: any}) => {
         animationType="slide"
         onDismiss={() => toggleModal(!showModal)}
         transparent={true}>
-        <TouchableWithoutFeedback
-          style={{
-            height: '100%',
-            backgroundColor: 'rgba(0, 0, 0, .3)',
-            padding: 20,
-          }}>
+        <TouchableWithoutFeedback onPress={() => toggleModal(!showModal)}>
           <View
             style={{
-              backgroundColor: MD2Colors.grey200,
+              height: '100%',
+              backgroundColor: 'rgba(0, 0, 0, .6)',
               padding: 20,
-              width: '80%',
-              marginLeft: '10%',
-              borderRadius: 5,
-              minHeight: '30%',
-              top: '30%',
             }}>
-            <Text variant="titleLarge" style={{textAlign: 'center'}}>
-              Confirm 2FA
-            </Text>
-            <View style={[styles.fcenter, {top: '10%'}]}>
-              <View style={{marginBottom: 16}}>
-                <TextInput
-                  value={text.text}
-                  onChangeText={txt => setText({...text, text: txt})}
-                  placeholder="...."
-                  style={{
-                    backgroundColor: 'transparent',
-                    letterSpacing: 30,
-                    width: 200,
-                    // textAlign: 'center',
-                  }}
-                  outlineColor={pry}
-                  activeUnderlineColor={pry}
-                  underlineColor={pry}
-                  textColor={pry}
-                  placeholderTextColor={pry}
-                />
+            <View
+              style={{
+                backgroundColor: MD2Colors.grey200,
+                padding: 20,
+                width: '80%',
+                marginLeft: '10%',
+                borderRadius: 5,
+                minHeight: '30%',
+                top: '30%',
+              }}>
+              <Text variant="titleLarge" style={{textAlign: 'center'}}>
+                Confirm 2-FA
+              </Text>
+              <View style={[styles.fcenter, {top: '10%'}]}>
+                <View style={{marginBottom: 10}}>
+                  <TextInput
+                    value={text.text}
+                    onChangeText={txt => setText({...text, text: txt})}
+                    placeholder="...."
+                    style={{
+                      backgroundColor: 'transparent',
+                      letterSpacing: 30,
+                      width: 150,
+                      // textAlign: 'center',
+                    }}
+                    outlineColor={pry}
+                    activeUnderlineColor={pry}
+                    underlineColor={pry}
+                    textColor={pry}
+                    placeholderTextColor={pry}
+                  />
+                </View>
+                {text.msg && (
+                  <Text
+                    style={{
+                      textAlign: 'center',
+                      color: MD2Colors.red400,
+                      padding: 5,
+                    }}
+                    variant="bodySmall">
+                    {text.msg}
+                  </Text>
+                )}
+                <Button
+                  mode="contained"
+                  compact={true}
+                  style={{paddingHorizontal: 10, backgroundColor: pry}}
+                  onPress={fn2FA}>
+                  Confirm
+                </Button>
               </View>
-              {text.msg && (
-                <Text
-                  style={{
-                    textAlign: 'center',
-                    color: MD2Colors.red400,
-                    padding: 5,
-                  }}
-                  variant="bodySmall">
-                  {text.msg}
-                </Text>
-              )}
-              <Button
-                mode="contained"
-                compact={true}
-                style={{paddingHorizontal: 10, backgroundColor: pry}}
-                onPress={fn2FA}>
-                Continue
-              </Button>
             </View>
           </View>
         </TouchableWithoutFeedback>
