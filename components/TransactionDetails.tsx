@@ -1,7 +1,14 @@
 /* eslint-disable @typescript-eslint/no-shadow */
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import React, {useState, useEffect} from 'react';
-import {Modal, StyleSheet, TouchableOpacity, View} from 'react-native';
+import {
+  Modal,
+  StyleSheet,
+  TextInput,
+  TouchableOpacity,
+  TouchableWithoutFeedback,
+  View,
+} from 'react-native';
 import {ScrollView} from 'react-native-gesture-handler';
 import LinearGradient from 'react-native-linear-gradient';
 import {
@@ -15,7 +22,13 @@ import {
 import {bg, pry, bod, sec, click} from './colors';
 import axios from './lib/axios';
 import {useUser} from './lib/context';
-import {chunk, adminTransaction, money, updateFirebase} from './lib/firestore';
+import {
+  chunk,
+  adminTransaction,
+  money,
+  updateFirebase,
+  users,
+} from './lib/firestore';
 import {transactionResponse} from './schema';
 import styles from './styles';
 
@@ -26,6 +39,7 @@ const TransactionDetails = ({route}: {route: any}) => {
   const [status, setStatus] = useState(transactionResponse);
   const [info, setInfo] = useState({show: false, msg: '', type: false});
   const [swap, setSwap] = useState(true);
+  const [showModal, toggleModal] = useState(false);
 
   let beneficiaryType = tInfo?.name;
   // date problem
@@ -51,8 +65,9 @@ const TransactionDetails = ({route}: {route: any}) => {
     setBtn(true);
     setStatus(transactionResponse);
     let req;
+    console.log(user.balance, Number(total));
     try {
-      if (user.balance > Number(total)) {
+      if (user.balance >= Number(total)) {
         let query = await axios.post('/pay', {
           ...data,
           request_id: requestId,
@@ -420,7 +435,9 @@ const TransactionDetails = ({route}: {route: any}) => {
             disabled={btn}
             style={css.button}
             labelStyle={{color: sec}}
-            onPress={transBtnFunc}>
+            onPress={() =>
+              !user.TWOFAEnable ? transBtnFunc() : toggleModal(!showModal)
+            }>
             Complete Transaction
           </Button>
         )}
@@ -584,12 +601,97 @@ const TransactionDetails = ({route}: {route: any}) => {
     );
   };
 
+  const TFAModal = () => {
+    const [text, setText] = useState({msg: '', text: '', tries: 3});
+    const fn2FA = async () => {
+      console.log(text.text == user.TWOFA, text.text, text.tries);
+      if (text.tries === 0) return;
+      if (user.TWOFA == text.text) {
+        toggleModal(!showModal);
+        transBtnFunc();
+      } else {
+        setText({
+          ...text,
+          msg: `Invalid 2-FA pin supplied tries remain ${text.tries - 1}`,
+          tries: text.tries - 1,
+        });
+      }
+    };
+
+    return (
+      <Modal
+        visible={showModal}
+        animationType="slide"
+        onDismiss={() => toggleModal(!showModal)}
+        transparent={true}>
+        <TouchableWithoutFeedback
+          style={{
+            height: '100%',
+            backgroundColor: 'rgba(0, 0, 0, .3)',
+            padding: 20,
+          }}>
+          <View
+            style={{
+              backgroundColor: MD2Colors.grey200,
+              padding: 20,
+              width: '80%',
+              marginLeft: '10%',
+              borderRadius: 5,
+              minHeight: '30%',
+              top: '30%',
+            }}>
+            <Text variant="titleLarge" style={{textAlign: 'center'}}>
+              Confirm 2FA
+            </Text>
+            <View style={[styles.fcenter, {top: '10%'}]}>
+              <View style={{marginBottom: 16}}>
+                <TextInput
+                  value={text.text}
+                  onChangeText={txt => setText({...text, text: txt})}
+                  placeholder="...."
+                  style={{
+                    backgroundColor: 'transparent',
+                    letterSpacing: 30,
+                    width: 200,
+                    // textAlign: 'center',
+                  }}
+                  outlineColor={pry}
+                  activeUnderlineColor={pry}
+                  underlineColor={pry}
+                  textColor={pry}
+                  placeholderTextColor={pry}
+                />
+              </View>
+              {text.msg && (
+                <Text
+                  style={{
+                    textAlign: 'center',
+                    color: MD2Colors.red400,
+                    padding: 5,
+                  }}
+                  variant="bodySmall">
+                  {text.msg}
+                </Text>
+              )}
+              <Button
+                mode="contained"
+                compact={true}
+                style={{paddingHorizontal: 10, backgroundColor: pry}}
+                onPress={fn2FA}>
+                Continue
+              </Button>
+            </View>
+          </View>
+        </TouchableWithoutFeedback>
+      </Modal>
+    );
+  };
+
   return (
     <LinearGradient
       colors={[sec + '44', sec + 'aa']}
       style={{flex: 1, paddingHorizontal: 10}}>
       <ScrollView showsVerticalScrollIndicator={false}>
-        {/* {swap && <BeneficiaryModal />} */}
         <TransactionInfo />
       </ScrollView>
       {info.show && (
@@ -631,6 +733,7 @@ const TransactionDetails = ({route}: {route: any}) => {
           </Snackbar>
         </View>
       )}
+      <TFAModal />
     </LinearGradient>
   );
 };
