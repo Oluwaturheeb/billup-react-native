@@ -52,13 +52,13 @@ export const adminTransaction = async (data: any, which = 'Payment') => {
       ? {
           commission: field.increment(data.commission),
           transactions: field.arrayUnion({
-            id: data.id,
+            userId: data.id,
             transaction: data.transaction,
           }),
         }
       : {
           payments: field.arrayUnion({
-            id: data.id,
+            userId: data.id,
             transaction: data.info,
           }),
         };

@@ -22,7 +22,9 @@ const UserProvider = ({children}: {children: any}) => {
     // Stop listening for updates when no longer required
     return () => subscriber();
   }, []);
-  return <User.Provider value={{user, setUser, id}}>{children}</User.Provider>;
+  return (
+    <User.Provider value={{user, setUser, id, setId}}>{children}</User.Provider>
+  );
 };
 
 export {useUser, UserProvider};

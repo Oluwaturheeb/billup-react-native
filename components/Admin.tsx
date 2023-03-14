@@ -11,23 +11,16 @@ import {
 } from 'react-native-paper';
 import {click, pry, sec} from './colors';
 import styles from './styles';
-import {Logs as TLog, TransactionResponse} from './interfaces';
-import {adminData, logs as SLog} from './schema';
+import {adminData, adminLog} from './schema';
 import {chunk, dateFormat, money, users} from './lib/firestore';
 import {ScrollView} from 'react-native-gesture-handler';
 import {Network} from './services/Components';
 
-const Logs = ({navigation}: {navigation: any; route: any}) => {
+const Admin = ({navigation}: {navigation: any; route: any}) => {
   const time = new Date().getHours();
-  const [action, setAction] = useState({show: false, data: SLog});
+  const [action, setAction] = useState({show: false, data: adminLog});
   const [data, setData] = useState({loading: true, data: adminData});
   const [tab, setTab] = useState({main: true, log: false});
-  // const [transAll, setTransAll] = useState({
-  //   success: 0,
-  //   failed: 0,
-  //   paySuccess: 0,
-  //   payFailed: 0,
-  // });
 
   useEffect(() => {
     (async () => {
@@ -39,8 +32,8 @@ const Logs = ({navigation}: {navigation: any; route: any}) => {
 
   const LogAction = () => {
     const [techDetails, setTechDetails] = useState(false);
-    let {data} = action;
-    let info: TransactionResponse = data.transaction;
+    let logData = action.data;
+    let info = logData.transaction;
 
     return (
       <Modal
@@ -65,7 +58,7 @@ const Logs = ({navigation}: {navigation: any; route: any}) => {
             <View
               style={{
                 backgroundColor:
-                  data.status !== 'failed'
+                  info.status !== 'failed'
                     ? pry + 'dd'
                     : MD2Colors.redA200 + 'dd',
                 borderTopStartRadius: 10,
@@ -74,7 +67,7 @@ const Logs = ({navigation}: {navigation: any; route: any}) => {
               }}>
               <IconButton
                 icon={
-                  data.status !== 'failed'
+                  info.status !== 'failed'
                     ? 'checkbox-marked-circle-outline'
                     : 'close-outline'
                 }
@@ -83,15 +76,10 @@ const Logs = ({navigation}: {navigation: any; route: any}) => {
               />
             </View>
             <View style={{padding: 16}}>
-              <Text
-                variant="titleLarge"
-                style={{textAlign: 'center', color: pry, marginBottom: 10}}>
-                Transaction Information
-              </Text>
               <View style={[styles.frow, styles.fspace, styles.my1]}>
                 <Button
                   onPress={() =>
-                    navigation.navigate('CustomerProfile', data.id)
+                    navigation.navigate('CustomerProfile', logData.userId)
                   }
                   style={{backgroundColor: pry}}
                   labelStyle={{color: MD2Colors.grey300}}
@@ -101,15 +89,15 @@ const Logs = ({navigation}: {navigation: any; route: any}) => {
                 <Button
                   onPress={() => setTechDetails(!techDetails)}
                   style={{backgroundColor: pry}}
-                  icon="eye"
+                  icon={!techDetails ? 'eye-outline' : 'eye-off-outline'}
                   labelStyle={{color: MD2Colors.grey300}}>
-                  {!techDetails ? 'See' : 'Close'} Technical Details
+                  {!techDetails ? 'Technical Details' : 'Close Details'}
                 </Button>
               </View>
               {!techDetails ? (
-                <>
+                <View>
                   <Text
-                    variant="bodySmall"
+                    variant="bodyLarge"
                     style={{textAlign: 'center', color: pry}}>
                     {info.title}
                   </Text>
@@ -118,16 +106,16 @@ const Logs = ({navigation}: {navigation: any; route: any}) => {
                     style={{textAlign: 'center', color: pry}}>
                     {info.desc}
                   </Text>
-                  {!info.cards && info.purchased_code && (
+                  {!info.info?.cards && info.info?.purchased_code && (
                     <Text
                       variant="bodyLarge"
                       style={{textAlign: 'center', color: click}}>
-                      {chunk(info.purchased_code.split(': ')[1])}
+                      {chunk(info.info?.purchased_code.split(': ')[1])}
                     </Text>
                   )}
-                  {info.cards && info.purchased_code && (
+                  {info.info?.cards && info.info?.purchased_code && (
                     <>
-                      {info.cards.map((item, index) => (
+                      {info.info.cards.map((item, index) => (
                         <View
                           key={index}
                           style={[
@@ -175,18 +163,22 @@ const Logs = ({navigation}: {navigation: any; route: any}) => {
                         {money(info.amount)}
                       </Text>
                     </View>
-                    <View style={[styles.frow, styles.fspace, styles.p1]}>
-                      <Text
-                        variant="bodySmall"
-                        style={{textAlign: 'center', color: pry}}>
-                        Commission
-                      </Text>
-                      <Text
-                        variant="bodySmall"
-                        style={{textAlign: 'center', color: pry}}>
-                        {money(info.info.content.transactions.commission)}
-                      </Text>
-                    </View>
+                    {info.info?.content && (
+                      <View style={[styles.frow, styles.fspace, styles.p1]}>
+                        <Text
+                          variant="bodySmall"
+                          style={{textAlign: 'center', color: pry}}>
+                          Commission
+                        </Text>
+                        <Text
+                          variant="bodySmall"
+                          style={{textAlign: 'center', color: pry}}>
+                          {money(
+                            info.info?.content.transactions.commission || 0,
+                          )}
+                        </Text>
+                      </View>
+                    )}
                     <View style={[styles.frow, styles.fspace, styles.p1]}>
                       <Text
                         variant="bodySmall"
@@ -196,10 +188,10 @@ const Logs = ({navigation}: {navigation: any; route: any}) => {
                       <Text
                         variant="bodySmall"
                         style={{textAlign: 'center', color: pry}}>
-                        {data.status === 'failed' ? 'Failed' : 'Successful'}
+                        {info.status === 'failed' ? 'Failed' : 'Successful'}
                       </Text>
                     </View>
-                    {info.code != '1' && info.code && (
+                    {info.info?.code != '1' && info.info?.code && (
                       <>
                         <View style={[styles.frow, styles.fspace, styles.p1]}>
                           <Text
@@ -208,9 +200,10 @@ const Logs = ({navigation}: {navigation: any; route: any}) => {
                             Transaction ID
                           </Text>
                           <Text
+                            selectable={true}
                             variant="bodySmall"
                             style={{textAlign: 'center', color: pry}}>
-                            {info.content.transactions?.transactionId}
+                            {info.info?.content.transactions.transactionId}
                           </Text>
                         </View>
                         <View style={[styles.frow, styles.fspace, styles.p1]}>
@@ -220,9 +213,10 @@ const Logs = ({navigation}: {navigation: any; route: any}) => {
                             Unique Element
                           </Text>
                           <Text
+                            selectable={true}
                             variant="bodySmall"
                             style={{textAlign: 'center', color: pry}}>
-                            {info.content.transactions?.unique_element}
+                            {info.info.content.transactions?.unique_element}
                           </Text>
                         </View>
                       </>
@@ -240,10 +234,12 @@ const Logs = ({navigation}: {navigation: any; route: any}) => {
                       </Text>
                     </View>
                   </View>
-                </>
+                </View>
               ) : (
                 <View style={{flex: 1}}>
-                  <Text selectable={true} variant="bodySmall">{JSON.stringify(info.info, null, 2)}</Text>
+                  <Text selectable={true} variant="bodySmall">
+                    {JSON.stringify(info.info, null, 4)}
+                  </Text>
                 </View>
               )}
             </View>
@@ -265,7 +261,7 @@ const Logs = ({navigation}: {navigation: any; route: any}) => {
     );
   };
 
-  const LogItems = ({item, index}: {item: TLog; index: number}) => {
+  const LogItems = ({item, index}: {index: number; item: any}) => {
     let {desc, title} = item.transaction;
     return (
       <TouchableRipple
@@ -294,43 +290,6 @@ const Logs = ({navigation}: {navigation: any; route: any}) => {
       </TouchableRipple>
     );
   };
-
-  /* const memoFunc = () => {
-    let trans = {
-      success: 0,
-      failed: 0,
-      paySuccess: 0,
-      payFailed: 0,
-    };
-
-    logs.map((item: any, index: number) => {
-      if (item?.title.includes('Topup')) {
-        if (item.status === 'success') {
-          let cal = Number(trans.paySuccess) + Number(item.amount);
-          trans = {...trans, paySuccess: cal};
-        } else {
-          let cal = Number(trans.payFailed) + Number(item.amount);
-          trans = {...trans, payFailed: cal};
-        }
-      } else {
-        if (item.status === 'failed') {
-          if (Number.isInteger(item.amount)) {
-            let cal = Number(trans.failed) + Number(item.amount);
-            trans = {...trans, failed: cal};
-          }
-        } else {
-          if (Number.isInteger(item.amount)) {
-            let cal = Number(trans.success) + Number(item.amount);
-            trans = {...trans, success: cal};
-          }
-        }
-      }
-      index + 1 === logs.length && setTimeout(() => setTransAll(trans), 1000);
-    });
-  }; */
-
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-  // useMemo(() => memoFunc(), []);
 
   const Greeting = () => (
     <View style={css.jumbo}>
@@ -419,84 +378,6 @@ const Logs = ({navigation}: {navigation: any; route: any}) => {
     </View>
   );
 
-  const PaymentHeader = () => {
-    return (
-      <LinearGradient
-        colors={[pry + 'dd', pry]}
-        end={{x: 1, y: 0}}
-        style={{borderRadius: 10, padding: 10, marginBottom: 10}}>
-        <View
-          style={[
-            styles.frow,
-            {marginBottom: 20, justifyContent: 'space-evenly'},
-          ]}>
-          <View style={styles.fcenter}>
-            <IconButton
-              icon="cash-multiple"
-              style={{marginVertical: -5}}
-              size={30}
-              iconColor={MD2Colors.grey300}
-            />
-            <Text variant="bodySmall" style={{color: MD2Colors.grey300}}>
-              {money(transAll.paySuccess)}
-            </Text>
-            <Text variant="bodySmall" style={{color: MD2Colors.grey300}}>
-              Total Payment
-            </Text>
-          </View>
-          <View style={styles.fcenter}>
-            <IconButton
-              icon="cash-remove"
-              style={{marginVertical: -5}}
-              size={30}
-              iconColor={MD2Colors.grey300}
-            />
-            <Text variant="bodySmall" style={{color: MD2Colors.grey300}}>
-              {money(transAll.payFailed)}
-            </Text>
-            <Text variant="bodySmall" style={{color: MD2Colors.grey300}}>
-              Failed Payment
-            </Text>
-          </View>
-        </View>
-        <View
-          style={[
-            styles.frow,
-            {marginBottom: 20, justifyContent: 'space-evenly'},
-          ]}>
-          <View style={styles.fcenter}>
-            <IconButton
-              icon="cash-check"
-              style={{marginVertical: -5}}
-              size={30}
-              iconColor={MD2Colors.grey300}
-            />
-            <Text variant="bodySmall" style={{color: MD2Colors.grey300}}>
-              {money(transAll.success)}
-            </Text>
-            <Text variant="bodyMedium" style={{color: MD2Colors.grey300}}>
-              Successful Transactions
-            </Text>
-          </View>
-          <View style={styles.fcenter}>
-            <IconButton
-              icon="cash-remove"
-              style={{marginVertical: -5}}
-              size={30}
-              iconColor={MD2Colors.grey300}
-            />
-            <Text variant="bodySmall" style={{color: MD2Colors.grey300}}>
-              {money(transAll.failed)}
-            </Text>
-            <Text variant="bodyMedium" style={{color: MD2Colors.grey300}}>
-              Failed Transactions
-            </Text>
-          </View>
-        </View>
-      </LinearGradient>
-    );
-  };
-
   return (
     <LinearGradient
       colors={[pry + 'cc', pry + 'ff', MD2Colors.green900]}
@@ -550,9 +431,7 @@ const css = StyleSheet.create({
     flex: 1,
     position: 'absolute',
     width: '100%',
-    // height: height,
-    // top: height,
   },
 });
 
-export default Logs;
+export default Admin;

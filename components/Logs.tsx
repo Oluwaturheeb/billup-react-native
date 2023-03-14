@@ -69,7 +69,7 @@ const Logs = () => {
                     : 'close-outline'
                 }
                 iconColor={MD2Colors.grey300}
-                size={150}
+                size={120}
               />
             </View>
             <View style={{padding: 16}}>

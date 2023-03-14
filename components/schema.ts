@@ -12,6 +12,7 @@ import {
   Operator,
   TransactionResponse,
   AdminData,
+  AdminLog,
 } from './interfaces';
 
 export const UserSchema: User = {
@@ -154,7 +155,7 @@ export const transactionResponse: TransactionResponse = {
 export const logs: Logs = {
   createdAt: {nanoseconds: 0, seconds: 0},
   desc: '',
-  info: {},
+  info: transactionResponse,
   title: '',
   status: '',
   amount: 0,
@@ -162,6 +163,39 @@ export const logs: Logs = {
 
 export const adminData: AdminData = {
   commission: 0,
-  transactions: [transactionResponse],
+  transactions: [
+    {
+      transaction: logs,
+      userId: '',
+    },
+  ],
   payments: [logs],
+};
+
+export const adminLog: AdminLog = {
+  transaction: logs,
+  userId: '',
+};
+
+export const statistics = {
+  loading: true,
+  stats: {
+    successAmount: 0,
+    failedAmount: 0,
+    paySuccessAmount: 0,
+    payFailedAmount: 0,
+    successfulTransactionCount: 0,
+    failedTransactionCount: 0,
+  },
+  users: {
+    ...UserSchema,
+    transactions: {
+      successAmount: 0,
+      failedAmount: 0,
+      paySuccessAmount: 0,
+      payFailedAmount: 0,
+      successfulTransactionCount: 0,
+      failedTransactionCount: 0,
+    },
+  },
 };

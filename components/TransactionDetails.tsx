@@ -22,13 +22,7 @@ import {
 import {bg, pry, bod, sec, click} from './colors';
 import axios from './lib/axios';
 import {useUser} from './lib/context';
-import {
-  chunk,
-  adminTransaction,
-  money,
-  updateFirebase,
-  users,
-} from './lib/firestore';
+import {chunk, adminTransaction, money, updateFirebase} from './lib/firestore';
 import {transactionResponse} from './schema';
 import styles from './styles';
 
@@ -65,7 +59,7 @@ const TransactionDetails = ({route}: {route: any}) => {
     setBtn(true);
     setStatus(transactionResponse);
     let req;
-    console.log(user.balance, Number(total));
+
     try {
       if (user.balance >= Number(total)) {
         let query = await axios.post('/pay', {

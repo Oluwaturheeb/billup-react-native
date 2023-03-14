@@ -13,10 +13,10 @@ import Animated, { BounceIn } from 'react-native-reanimated';
 import styles from './styles';
 import LinearGradient from 'react-native-linear-gradient';
 
-const Welcome = ({navigation,route}: {navigation: any; route: any}) => {
+const Welcome = ({navigation}: {navigation: any}) => {
   const [firstTime, setFirstTime] = useState(false);
   const [skip, setSkip] = useState(false);
-  const {user, setUser}: User = useUser();
+  const {user, setUser, id, setId}: User = useUser();
 
   useEffect(() => {
     (async () => {
@@ -30,7 +30,7 @@ const Welcome = ({navigation,route}: {navigation: any; route: any}) => {
   }, []);
 
   // redirect after auth
-  if (user?.email) setTimeout(() => navigation.navigate('Home'), 0);
+  if (id) setTimeout(() => navigation.navigate('Home'), 5000);
 
   // authentication
   const googleAuth = async () => {
@@ -42,7 +42,7 @@ const Welcome = ({navigation,route}: {navigation: any; route: any}) => {
     try {
       await GoogleSignin.hasPlayServices();
       let status = await GoogleSignin.isSignedIn(),
-        login, authUser, id;
+        login, authUser;
 
       if (status) login = await GoogleSignin.getCurrentUser();
       else login = await GoogleSignin.signIn();
@@ -56,23 +56,20 @@ const Welcome = ({navigation,route}: {navigation: any; route: any}) => {
           // get user info
           let userInfo = get.docs[0];
           authUser = userInfo.data();
-          id = userInfo.id;
+          
           // slam user id in d app storage!
-          await AsyncStorage.setItem('id', id);
+          await AsyncStorage.setItem('id', userInfo.id);
         } else {
           // okay! newuser
           authUser = { ...googleAuthUser, balance: 0, logs: [] };
           // add the user to firebase
-          let add = await users.add(authUser);
-          // slam user data in d app storage!
-          // await AsyncStorage.setItem('user', JSON.stringify(authUser));
-          await AsyncStorage.setItem('id', add.id);
+          (await users.add(authUser)).onSnapshot(async (doc) => {
+            // slam user data in d app storage!
+            setId(doc.id);
+            await AsyncStorage.setItem('id', doc.id);
+          })
+          setUser(authUser);
         }
-        setUser(authUser);
-        navigation.setParams({
-          user: authUser,
-          id: id,
-        });
       }
     } catch (error) {
       console.error(error);
@@ -81,45 +78,8 @@ const Welcome = ({navigation,route}: {navigation: any; route: any}) => {
 
   return (
     <LinearGradient colors={[MD2Colors.green100, MD2Colors.grey200]} style={{ flex: 1 }}>
-      <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
-      <View style={[styles.frow, styles.fcenter]}>
-        <Animated.View entering={BounceIn.duration(1000)} style={{margin: 10}}>
-          <Text variant="bodyLarge">Airtime</Text>
-        </Animated.View>
-        <Animated.View entering={BounceIn.duration(1200).delay(100)} style={{margin: 10}}>
-          <Text variant="bodyLarge">Mobile Data</Text>
-        </Animated.View>
-        <Animated.View entering={BounceIn.duration(1400).delay(300)} style={{margin: 10}}>
-          <Text variant="bodyLarge">TV Sub</Text>
-        </Animated.View>
-      </View>
-      <View style={[styles.frow, styles.fcenter]}>
-        <Animated.View entering={BounceIn.duration(1200).delay(3000)}>
-          <Text variant="displayLarge" style={{textAlign: 'center'}}>Billup</Text>
-          <Text variant="bodySmall" style={{textAlign: 'center', marginTop: -5}}>Sure plug to get bills paid</Text>
-        </Animated.View>
-      </View>
-      <View style={[styles.frow, styles.fcenter]}>
-        <Animated.View entering={BounceIn.duration(1600).delay(500)} style={{margin: 10}}>
-          <Text variant="bodyLarge">Electricity</Text>
-        </Animated.View>
-        <Animated.View entering={BounceIn.duration(1800).delay(700)} style={{margin: 10}}>
-          <Text variant="bodyLarge">Education</Text>
-        </Animated.View>
-      </View>
-        {/* <Text variant='displayLarge'>Billup</Text>
-        <Text variant='titleLarge' style={{ fontSize: 24 }}>Get ur bills paid steadly</Text> */}
-        {(skip && !firstTime ) && (
-          <>
-            <GoogleSigninButton
-              style={{ width: 260, height: 48, marginTop: 10 }}
-              size={GoogleSigninButton.Size.Wide}
-              onPress={googleAuth}
-            />
-          </>
-        )}
-      </View>
-      {firstTime && (
+      
+      {firstTime ? (
         <>
           {skip && <Button
             icon="skip-forward"
@@ -151,7 +111,43 @@ const Welcome = ({navigation,route}: {navigation: any; route: any}) => {
             )}
           />
         </>
-
+      ): (
+        <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
+      <View style={[styles.frow, styles.fcenter]}>
+        <Animated.View entering={BounceIn.duration(1000)} style={{margin: 10}}>
+          <Text variant="bodyLarge">Airtime</Text>
+        </Animated.View>
+        <Animated.View entering={BounceIn.duration(1200).delay(100)} style={{margin: 10}}>
+          <Text variant="bodyLarge">Mobile Data</Text>
+        </Animated.View>
+        <Animated.View entering={BounceIn.duration(1400).delay(300)} style={{margin: 10}}>
+          <Text variant="bodyLarge">TV Sub</Text>
+        </Animated.View>
+      </View>
+      <View style={[styles.frow, styles.fcenter]}>
+        <Animated.View entering={BounceIn.duration(1200).delay(3000)}>
+          <Text variant="displayLarge" style={{textAlign: 'center'}}>Billup</Text>
+          <Text variant="bodySmall" style={{textAlign: 'center', marginTop: -5}}>Sure plug to get bills paid</Text>
+        </Animated.View>
+      </View>
+      <View style={[styles.frow, styles.fcenter]}>
+        <Animated.View entering={BounceIn.duration(1600).delay(500)} style={{margin: 10}}>
+          <Text variant="bodyLarge">Electricity</Text>
+        </Animated.View>
+        <Animated.View entering={BounceIn.duration(1800).delay(700)} style={{margin: 10}}>
+          <Text variant="bodyLarge">Education</Text>
+        </Animated.View>
+      </View>
+        {!id && (
+          <>
+            <GoogleSigninButton
+              style={{ width: 260, height: 48, marginTop: 10 }}
+              size={GoogleSigninButton.Size.Wide}
+              onPress={googleAuth}
+            />
+          </>
+        )}
+      </View>
       )}
     </LinearGradient>
   );

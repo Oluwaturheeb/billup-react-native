@@ -1,4 +1,4 @@
-import React, {useRef, useState} from 'react';
+import React, {useEffect, useRef, useState} from 'react';
 import {NavigationContainer, useNavigation} from '@react-navigation/native';
 import {createNativeStackNavigator} from '@react-navigation/native-stack';
 import Welcome from './components/Welcome';
@@ -9,30 +9,99 @@ import TransactionDetails from './components/TransactionDetails';
 import {
   DrawerLayout,
   GestureHandlerRootView,
-  TouchableWithoutFeedback,
 } from 'react-native-gesture-handler';
 import {
   Avatar,
   IconButton,
   MD2Colors,
+  Searchbar,
   Text,
   TouchableRipple,
-  Button,
 } from 'react-native-paper';
 import styles from './components/styles';
-import {Modal, View} from 'react-native';
+import {View} from 'react-native';
 import {pry, sec} from './components/colors';
 import LinearGradient from 'react-native-linear-gradient';
-import {money, users} from './components/lib/firestore';
+import {money} from './components/lib/firestore';
 import {UserProvider, useUser} from './components/lib/context';
 import Logs from './components/Logs';
 import Admin from './components/Admin';
 import CustomerProfile from './components/CustomerProfile';
 import Settings from './components/Settings';
+import Statistics from './components/Statistics';
+import filter from 'lodash.filter';
+import {Logs as UserLog} from './components/interfaces';
 
 const App = () => {
   const Stack = createNativeStackNavigator();
   const navRef = useRef();
+  const [search, setSearch] = useState({
+    show: false,
+    value: '',
+    filter: [],
+  });
+
+  const Headers = ({props}: {props: any}) => {
+    return (
+      <LinearGradient
+        colors={[pry + 'dd', pry + 'cc']}
+        style={{justifyContent: 'center'}}>
+        <View style={[styles.frow, styles.fspace]}>
+          {props.back == undefined ? (
+            <>
+              <IconButton
+                icon="menu"
+                iconColor={sec}
+                onPress={navRef.current?.openDrawer}
+              />
+              <View style={[styles.frow]}>
+                <IconButton
+                  icon="magnify"
+                  onPress={() => setSearch({...search, show: true})}
+                  iconColor={sec}
+                  style={{marginVertical: 10}}
+                />
+                <IconButton icon="bell-outline" iconColor={sec} />
+              </View>
+            </>
+          ) : (
+            <View style={[styles.frow, styles.fspace, {flex: 1}]}>
+              <View style={[styles.frow, {alignItems: 'center'}]}>
+                <IconButton
+                  icon="arrow-left"
+                  onPress={props.navigation.goBack}
+                  iconColor={sec}
+                  style={{marginVertical: 10}}
+                />
+                <Text variant="titleMedium" style={{color: sec + 'ff'}}>
+                  {props.options.title}
+                </Text>
+              </View>
+              <View style={[styles.frow]}>
+                <IconButton
+                  icon="magnify"
+                  onPress={() => setSearch({...search, show: true})}
+                  iconColor={sec}
+                  style={{marginVertical: 10}}
+                />
+                <IconButton
+                  icon="bell"
+                  iconColor={sec}
+                  style={{marginVertical: 10}}
+                />
+                <IconButton
+                  icon="menu"
+                  onPress={navRef.current.openDrawer}
+                  iconColor={sec}
+                  style={{marginVertical: 10}}
+                />
+              </View>
+            </View>
+          )}
+        </View>
+      </LinearGradient>
+    );
+  };
 
   const NavDrawer = () => {
     const nav = useNavigation();
@@ -169,6 +238,23 @@ const App = () => {
                   </Text>
                 </View>
               </TouchableRipple>
+              <TouchableRipple
+                rippleColor={pry + '44'}
+                onPress={() => {
+                  nav.navigate('Stats', {stats: 1});
+                  navRef.current.closeDrawer();
+                }}>
+                <View style={[styles.frow, styles.fVertCenter, styles.p2]}>
+                  <IconButton
+                    style={{marginVertical: -10}}
+                    iconColor={pry}
+                    icon="chart-bar"
+                  />
+                  <Text variant="bodySmall" style={{color: pry}}>
+                    Statistics
+                  </Text>
+                </View>
+              </TouchableRipple>
             </View>
           </View>
         )}
@@ -176,57 +262,50 @@ const App = () => {
     );
   };
 
-  const Headers = ({props}: {props: any}) => (
-    <LinearGradient
-      colors={[pry + 'dd', pry + 'cc']}
-      style={{justifyContent: 'center'}}>
-      <View style={[styles.frow, styles.fspace]}>
-        {props.back == undefined ? (
-          <>
-            <IconButton
-              icon="menu"
-              iconColor={sec}
-              onPress={navRef.current?.openDrawer}
-            />
-            <IconButton icon="bell-outline" iconColor={sec} />
-          </>
-        ) : (
-          <View style={[styles.frow, styles.fspace, {flex: 1}]}>
-            <View style={[styles.frow, {alignItems: 'center'}]}>
-              <IconButton
-                icon="arrow-left"
-                onPress={props.navigation.goBack}
-                iconColor={sec}
-                style={{marginVertical: 10}}
-              />
-              <Text variant="titleMedium" style={{color: sec + 'ff'}}>
-                {props.options.title}
-              </Text>
-            </View>
-            <View style={[styles.frow]}>
-              <IconButton
-                icon="bell"
-                // onPress={() => props.navigation('Home')}
-                iconColor={sec}
-                style={{marginVertical: 10}}
-              />
-              <IconButton
-                icon="menu"
-                onPress={navRef.current.openDrawer}
-                iconColor={sec}
-                style={{marginVertical: 10}}
-              />
-            </View>
-          </View>
-        )}
-      </View>
-    </LinearGradient>
-  );
+  const Search = () => {
+    const {user} = useUser();
+    console.log(user);
+    return (
+      <LinearGradient
+        colors={[pry + '11', pry + '33']}
+        style={{position: 'relative', height: '100%'}}>
+        <Searchbar
+          placeholder="Search"
+          value={search.value}
+          onChangeText={text => {
+            setSearch({...search, value: text});
+            /* let searchResult = filter(user.logs, (item: UserLog) => {
+              let {title, desc, info} = item;
+              console.log(item);
+              if (
+                title.toLowerCase().includes(text) ||
+                desc.toLowerCase().includes(text) ||
+                info?.Pin ||
+                info?.bonusToken ||
+                info?.token ||
+                info?.amount ||
+                info?.requestId
+              ) {
+                return true;
+              }
+            });
+
+            setSearch({
+              ...search,
+              filter: searchResult,
+            }); */
+          }}
+        />
+        <View />
+      </LinearGradient>
+    );
+  };
 
   return (
     <GestureHandlerRootView style={{flex: 1}}>
       <UserProvider>
         <NavigationContainer>
+          {search.show && <Search />}
           <DrawerLayout
             drawerWidth={240}
             drawerPosition="right"
@@ -289,6 +368,11 @@ const App = () => {
                 name="Settings"
                 component={Settings}
                 options={{title: 'Account Settings'}}
+              />
+              <Stack.Screen
+                name="Stats"
+                component={Statistics}
+                options={{title: 'Statistics'}}
               />
             </Stack.Navigator>
           </DrawerLayout>

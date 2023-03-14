@@ -1,4 +1,4 @@
-import React, {useState, useEffect} from 'react';
+import React, {useState, useEffect, memo} from 'react';
 import {CommonActions} from '@react-navigation/native';
 import {
   PermissionsAndroid,
@@ -20,7 +20,7 @@ import {
 import {click, pry, sec} from './colors';
 import styles from './styles';
 import {FlatList, Gesture, GestureDetector} from 'react-native-gesture-handler';
-import {Network} from './services/Components';
+import {Network, PaymentModal} from './services/Components';
 import {adminTransaction, money, ref, updateFirebase} from './lib/firestore';
 import LinearGradient from 'react-native-linear-gradient';
 import PayWithFlutterwave from 'flutterwave-react-native';
@@ -48,14 +48,10 @@ const Home = ({navigation}: {navigation: any}) => {
   // });
   const [data, setData] = useState(homeData);
   const time = new Date().getHours();
-  const {user, setUser, id} = useUser();
+  const {user} = useUser();
   const [show, setShow] = useState(true);
   const [tab, setTab] = useState({main: true, log: false});
   const [showModal, toggleModal] = useState(false);
-  const [topUp, setTopUp] = useState<{
-    msg: string;
-    value: any;
-  }>({msg: '', value: 500});
 
   useEffect(() => {
     // reset the navigation after d welcome screen has been displayed
@@ -92,7 +88,7 @@ const Home = ({navigation}: {navigation: any}) => {
           identifier: 'education',
           name: 'Education',
         },
-        /* 
+        /*
         {
           identifier: 'funds',
           name: 'Funds',
@@ -116,7 +112,9 @@ const Home = ({navigation}: {navigation: any}) => {
     (async () => {
       await PermissionsAndroid.request('android.permission.READ_CONTACTS');
       let item = await AsyncStorage.getItem('show');
-      if (item) setShow(item == 'show' ? true : false);
+      if (item) {
+        setShow(item == 'show' ? true : false);
+      }
     })();
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
@@ -364,6 +362,8 @@ const Home = ({navigation}: {navigation: any}) => {
     );
   };
 
+  // const Freeze = memo(() => <Services />, []);
+
   return (
     <View style={{flex: 1}}>
       <LinearGradient
@@ -374,128 +374,7 @@ const Home = ({navigation}: {navigation: any}) => {
         <Network />
       </LinearGradient>
       {showModal && (
-        <Modal
-          visible={showModal}
-          animationType="slide"
-          onDismiss={() => toggleModal(!showModal)}
-          transparent={true}>
-          <TouchableOpacity
-            onPress={() => toggleModal(!showModal)}
-            style={{height: '100%', backgroundColor: 'rgba(0,0,0,.7)'}}>
-            <View
-              style={{
-                backgroundColor: MD2Colors.grey200,
-                padding: 20,
-                width: width - 40,
-                borderRadius: 10,
-                top: '24%',
-                alignSelf: 'center',
-              }}>
-              <TextInput
-                onChangeText={(text: number | string) =>
-                  setTopUp({...topUp, value: text})
-                }
-                value={topUp.value}
-                keyboardType="numeric"
-                placeholder="Amount..."
-                label="Wallet"
-                style={{backgroundColor: 'transparent'}}
-                outlineColor={pry}
-                activeUnderlineColor={pry}
-                underlineColor={pry}
-                textColor={pry}
-                placeholderTextColor={pry}
-                selectionColor={click}
-                left={<TextInput.Icon icon="cash-plus" iconColor={pry} />}
-              />
-              <Text
-                variant="bodySmall"
-                style={{
-                  color: MD2Colors.red400,
-                  paddingVertical: 5,
-                  textAlign: 'center',
-                }}>
-                Note: A service fee of {money(50)} will be charged.
-              </Text>
-              {topUp.msg != '' && (
-                <Text
-                  variant="bodySmall"
-                  style={{
-                    color: MD2Colors.red400,
-                    paddingVertical: 5,
-                    textAlign: 'center',
-                  }}>
-                  {topUp.msg}
-                </Text>
-              )}
-              <View style={[styles.frow, styles.fcenter, styles.my1]}>
-                <Button mode="outlined" onPress={() => toggleModal(!showModal)}>
-                  Cancel
-                </Button>
-                <PayWithFlutterwave
-                  onRedirect={async e => {
-                    let log = {
-                      title: 'Wallet Topup',
-                      desc: 'Wallet topup of ' + money(topUp.value),
-                      status: e.status == 'successful' ? 'success' : 'failed',
-                      amount: e.status == 'successful' ? topUp.value : 0,
-                      info: e,
-                      createdAt: new Date(),
-                    };
-                    await updateFirebase(id, topUp.value - 50, log, true);
-                    await adminTransaction({id, info: log});
-
-                    // update the user
-                    setUser({
-                      ...user,
-                      balance: user.balance + (topUp.value - 50),
-                    });
-                    setTopUp({msg: '', value: 0});
-                    toggleModal(!showModal);
-                  }}
-                  options={{
-                    tx_ref: ref,
-                    amount: topUp.value,
-                    authorization:
-                      'FLWPUBK_TEST-3ffa62793f521b1e3134650390f7ea97-X',
-                    customer: {
-                      name: user?.name,
-                      email: user?.email,
-                    },
-                    currency: 'NGN',
-                    payment_options: 'card,banktransfer',
-                    customizations: {
-                      title: 'Billup',
-                      description: 'Wallet payment',
-                    },
-                  }}
-                  customButton={props => (
-                    <Button
-                      mode="contained"
-                      onPress={async () => {
-                        if (topUp.value < 100) {
-                          setTopUp({
-                            ...topUp,
-                            msg: 'Minimum top up value is ' + money(100),
-                          });
-                        } else if (topUp.value > 500000) {
-                          setTopUp({
-                            ...topUp,
-                            msg: 'Maximum top up value is ' + money(50000),
-                          });
-                        } else {
-                          props.onPress();
-                          setTopUp({...topUp, msg: ''});
-                        }
-                      }}>
-                      Continue
-                    </Button>
-                  )}
-                />
-              </View>
-            </View>
-          </TouchableOpacity>
-        </Modal>
+        <PaymentModal toggleModal={toggleModal} showModal={showModal} />
       )}
     </View>
   );
@@ -527,3 +406,126 @@ const css = StyleSheet.create({
 });
 
 export default Home;
+
+// {/* <Modal
+//   visible={showModal}
+//   animationType="slide"
+//   onDismiss={() => toggleModal(!showModal)}
+//   transparent={true}>
+//   <TouchableOpacity
+//     onPress={() => toggleModal(!showModal)}
+//     style={{height: '100%', backgroundColor: 'rgba(0,0,0,.7)'}}>
+//     <View
+//       style={{
+//         backgroundColor: MD2Colors.grey200,
+//         padding: 20,
+//         width: width - 40,
+//         borderRadius: 10,
+//         top: '24%',
+//         alignSelf: 'center',
+//       }}>
+//       <TextInput
+//         onChangeText={(text: number | string) =>
+//           setTopUp({...topUp, value: text})
+//         }
+//         value={topUp.value}
+//         keyboardType="numeric"
+//         placeholder="Amount..."
+//         label="Wallet"
+//         style={{backgroundColor: 'transparent'}}
+//         outlineColor={pry}
+//         activeUnderlineColor={pry}
+//         underlineColor={pry}
+//         textColor={pry}
+//         placeholderTextColor={pry}
+//         selectionColor={click}
+//         left={<TextInput.Icon icon="cash-plus" iconColor={pry} />}
+//       />
+//       <Text
+//         variant="bodySmall"
+//         style={{
+//           color: MD2Colors.red400,
+//           paddingVertical: 5,
+//           textAlign: 'center',
+//         }}>
+//         Note: A service fee of {money(50)} will be charged.
+//       </Text>
+//       {topUp.msg != '' && (
+//         <Text
+//           variant="bodySmall"
+//           style={{
+//             color: MD2Colors.red400,
+//             paddingVertical: 5,
+//             textAlign: 'center',
+//           }}>
+//           {topUp.msg}
+//         </Text>
+//       )}
+//       <View style={[styles.frow, styles.fcenter, styles.my1]}>
+//         <Button mode="outlined" onPress={() => toggleModal(!showModal)}>
+//           Cancel
+//         </Button>
+//         <PayWithFlutterwave
+//           onRedirect={async e => {
+//             let log = {
+//               title: 'Wallet Topup',
+//               desc: 'Wallet topup of ' + money(topUp.value),
+//               status: e.status == 'successful' ? 'success' : 'failed',
+//               amount: e.status == 'successful' ? topUp.value : 0,
+//               info: e,
+//               createdAt: new Date(),
+//             };
+//             await updateFirebase(id, topUp.value - 50, log, true);
+//             await adminTransaction({id, info: log});
+
+//             // update the user
+//             setUser({
+//               ...user,
+//               balance: user.balance + (topUp.value - 50),
+//             });
+//             setTopUp({msg: '', value: 0});
+//             toggleModal(!showModal);
+//           }}
+//           options={{
+//             tx_ref: ref,
+//             amount: topUp.value,
+//             authorization:
+//               'FLWPUBK_TEST-3ffa62793f521b1e3134650390f7ea97-X',
+//             customer: {
+//               name: user?.name,
+//               email: user?.email,
+//             },
+//             currency: 'NGN',
+//             payment_options: 'card,banktransfer',
+//             customizations: {
+//               title: 'Billup',
+//               description: 'Wallet payment',
+//             },
+//           }}
+//           customButton={props => (
+//             <Button
+//               mode="contained"
+//               onPress={async () => {
+//                 if (topUp.value < 100) {
+//                   setTopUp({
+//                     ...topUp,
+//                     msg: 'Minimum top up value is ' + money(100),
+//                   });
+//                 } else if (topUp.value > 500000) {
+//                   setTopUp({
+//                     ...topUp,
+//                     msg: 'Maximum top up value is ' + money(50000),
+//                   });
+//                 } else {
+//                   props.onPress();
+//                   setTopUp({...topUp, msg: ''});
+//                 }
+//               }}>
+//               Continue
+//             </Button>
+//           )}
+//         />
+//       </View>
+//     </View>
+//   </TouchableOpacity>
+// </Modal> */}

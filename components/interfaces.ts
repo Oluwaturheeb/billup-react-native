@@ -1,3 +1,4 @@
+import {AdminData, Statistics} from './interfaces';
 export interface HomeDataProps {
   content: ContentProp[];
   response_description: String;
@@ -9,14 +10,14 @@ export interface ContentProp {
 }
 
 export interface User {
-  email: String;
-  familyName: String;
+  email: string;
+  familyName: string;
   givenName: String;
-  id: String;
-  name: String;
-  photo: String;
+  id: string;
+  name: string;
+  photo: string;
   logs: Logs[];
-  balance: Number;
+  balance: number;
 }
 
 export interface SelectedService {
@@ -54,7 +55,7 @@ export interface Logs {
   amount: number;
   createdAt: {nanoseconds: number; seconds: number};
   desc: String;
-  info?: any;
+  info?: TransactionResponse;
   status: String;
   title: String;
 }
@@ -169,5 +170,29 @@ export interface TransactionResponse {
 export interface AdminData {
   commission: number;
   payments: Logs[];
-  transactions: TransactionResponse[];
+  transactions: AdminLog[];
+}
+
+export interface AdminLog {
+  transaction: Logs;
+  userId: string;
+}
+
+interface StatisticsNumbers {
+  successAmount: number;
+  failedAmount: number;
+  paySuccessAmount: number;
+  payFailedAmount: number;
+  successfulTransactionCount: number;
+  failedTransactionCount: number;
+}
+
+export interface AdminUser extends User {
+  transactions: StatisticsNumbers;
+}
+
+export interface Statistics {
+  loading: boolean;
+  stats: StatisticsNumbers;
+  users: AdminUser[];
 }
