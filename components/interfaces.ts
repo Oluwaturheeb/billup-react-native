@@ -1,4 +1,3 @@
-import {AdminData, Statistics} from './interfaces';
 export interface HomeDataProps {
   content: ContentProp[];
   response_description: String;
@@ -195,4 +194,51 @@ export interface Statistics {
   loading: boolean;
   stats: StatisticsNumbers;
   users: AdminUser[];
+}
+
+export interface TransactionData {
+  amount: number;
+  billersCode: string;
+  country_code: string;
+  email: string;
+  operator_id: number;
+  phone: string;
+  product_type_id: number;
+  serviceID: string;
+  variation_code: number;
+}
+
+export interface TransactionInfo {
+  foreign: {};
+  image: string;
+  name: string;
+  serviceID: string;
+  total: number;
+  type: string;
+  xtra: number;
+  userInfo?: CustomerInfo;
+}
+
+export interface CustomerInfo {
+  Current_Bouquet: string;
+  Current_Bouquet_Code: string;
+  Customer_Name: string;
+  Customer_Number: number;
+  Customer_Type: string;
+  Due_Date: string;
+  Renewal_Amount: number;
+  Status: string;
+}
+
+export interface BeneficiaryValue {
+  data: TransactionData;
+  info: TransactionInfo;
+  details: Contact;
+}
+
+export interface Beneficiary {
+  keys: string[];
+  value: {
+    [key: string]: BeneficiaryValue;
+  };
 }

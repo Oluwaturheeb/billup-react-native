@@ -234,11 +234,18 @@ const Airtime = ({navigation, route}: {navigation: any; route: any}) => {
 
     return (
       <View style={css.inputContainer}>
-        <Text
-          variant="titleLarge"
-          style={{color: sec, textAlign: 'center', marginVertical: 5}}>
-          {selectedService.name}
-        </Text>
+        <View style={[styles.frow, styles.fcenter]}>
+          <Avatar.Image
+            source={{uri: selectedService.image}}
+            size={60}
+            style={{backgroundColor: pry}}
+          />
+          <Text
+            variant="titleLarge"
+            style={{color: sec, textAlign: 'center', marginVertical: 5}}>
+            {selectedService.name}
+          </Text>
+        </View>
         {fData.country.name && (
           <View
             style={[
@@ -691,7 +698,6 @@ const Airtime = ({navigation, route}: {navigation: any; route: any}) => {
             loading: false,
             data: req.data.content.variations,
           });
-          console.log(JSON.stringify(req.data, null, 2));
         })();
         // eslint-disable-next-line react-hooks/exhaustive-deps
       }, []);

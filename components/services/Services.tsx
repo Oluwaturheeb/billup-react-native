@@ -28,10 +28,8 @@ import {SelectedService} from '../interfaces';
 const Services = ({navigation, route}: {navigation: any; route: any}) => {
   // get user info
   const {user} = useUser();
-
   // get current item and other items from the route params
   const {item: curItem, others} = route.params;
-
   // data collection
   // available services
   const [data, setData] = useState(serviceData);
@@ -41,7 +39,7 @@ const Services = ({navigation, route}: {navigation: any; route: any}) => {
     data: {code: '', content: {}},
   });
 
-  // sservice var
+  // service var
   // selected service
   const [selService, setSelService] = useState(service);
   // selected service variation
@@ -357,13 +355,14 @@ const Services = ({navigation, route}: {navigation: any; route: any}) => {
       selectedPhone: {number},
     } = await selectContactPhone();
 
+    let setting =
+      curItem.identifier == 'data' || selService.serviceID.includes('waec');
+
+    console.log(setting);
     setContact({
       ...selectContact,
       email: emails[0],
-      biller:
-        curItem.identifier == 'data' &&
-        selService.serviceID.includes('waec') &&
-        number,
+      biller: setting ? number : selectContact.biller,
       name: givenName,
       phone: number,
     });

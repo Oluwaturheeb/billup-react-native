@@ -5,6 +5,7 @@ import {
   Button,
   IconButton,
   MD2Colors,
+  Searchbar,
   Text,
   TouchableRipple,
 } from 'react-native-paper';
@@ -15,8 +16,9 @@ import {Logs as TLog, TransactionResponse} from './interfaces';
 import {logs as SLog} from './schema';
 import {chunk, dateFormat, money} from './lib/firestore';
 import {ScrollView} from 'react-native-gesture-handler';
+import filter from 'lodash.filter';
 
-const Logs = () => {
+const Logs = ({route}: {route: any}) => {
   const {
     user: {logs},
   } = useUser();
@@ -28,7 +30,7 @@ const Logs = () => {
     payFailed: 0,
   });
 
-  const LogAction = () => {
+  const ViewLog = () => {
     let {data} = action;
     let info: TransactionResponse = data.info;
 
@@ -222,7 +224,7 @@ const Logs = () => {
       <TouchableRipple
         key={index}
         rippleColor={pry}
-        style={{paddingVertical: 5}}
+        style={{padding: 7}}
         onPress={() => setAction({...action, show: true, data: item})}>
         <View style={[styles.frow, {alignItems: 'center'}]}>
           <IconButton
@@ -283,101 +285,167 @@ const Logs = () => {
   // eslint-disable-next-line react-hooks/exhaustive-deps
   useMemo(() => memoFunc(), [logs]);
 
-  return (
-    <LinearGradient colors={[sec + '44', sec + 'aa']} style={{flex: 1}}>
-      {action.show && <LogAction />}
-      <FlatList
-        ListHeaderComponent={
-          <LinearGradient
-            colors={[pry + 'dd', pry]}
-            end={{x: 1, y: 0}}
-            style={{borderRadius: 10, padding: 10, marginBottom: 10}}>
-            <View
-              style={[
-                styles.frow,
-                {marginBottom: 20, justifyContent: 'space-evenly'},
-              ]}>
-              <View style={styles.fcenter}>
-                <IconButton
-                  icon="cash-multiple"
-                  style={{marginVertical: -5}}
-                  size={30}
-                  iconColor={MD2Colors.grey300}
-                />
-                <Text variant="bodySmall" style={{color: MD2Colors.grey300}}>
-                  {money(transAll.paySuccess)}
-                </Text>
-                <Text variant="bodySmall" style={{color: MD2Colors.grey300}}>
-                  Total Payment
-                </Text>
-              </View>
-              <View style={styles.fcenter}>
-                <IconButton
-                  icon="cash-remove"
-                  style={{marginVertical: -5}}
-                  size={30}
-                  iconColor={MD2Colors.grey300}
-                />
-                <Text variant="bodySmall" style={{color: MD2Colors.grey300}}>
-                  {money(transAll.payFailed)}
-                </Text>
-                <Text variant="bodySmall" style={{color: MD2Colors.grey300}}>
-                  Failed Payment
-                </Text>
-              </View>
-            </View>
-            <View
-              style={[
-                styles.frow,
-                {marginBottom: 20, justifyContent: 'space-evenly'},
-              ]}>
-              <View style={styles.fcenter}>
-                <IconButton
-                  icon="cash-check"
-                  style={{marginVertical: -5}}
-                  size={30}
-                  iconColor={MD2Colors.grey300}
-                />
-                <Text variant="bodySmall" style={{color: MD2Colors.grey300}}>
-                  {money(transAll.success)}
-                </Text>
-                <Text variant="bodyMedium" style={{color: MD2Colors.grey300}}>
-                  Successful Transactions
-                </Text>
-              </View>
-              <View style={styles.fcenter}>
-                <IconButton
-                  icon="cash-remove"
-                  style={{marginVertical: -5}}
-                  size={30}
-                  iconColor={MD2Colors.grey300}
-                />
-                <Text variant="bodySmall" style={{color: MD2Colors.grey300}}>
-                  {money(transAll.failed)}
-                </Text>
-                <Text variant="bodyMedium" style={{color: MD2Colors.grey300}}>
-                  Failed Transactions
-                </Text>
-              </View>
-            </View>
-          </LinearGradient>
-        }
-        ItemSeparatorComponent={() => (
-          <View
-            style={{
-              borderColor: MD2Colors.grey300,
-              borderBottomWidth: 1,
-            }}
+  const UserStats = () => (
+    <LinearGradient
+      colors={[pry + 'dd', pry]}
+      end={{x: 1, y: 0}}
+      style={{borderRadius: 10, padding: 10, marginBottom: 10}}>
+      <View
+        style={[
+          styles.frow,
+          {marginBottom: 20, justifyContent: 'space-evenly'},
+        ]}>
+        <View style={styles.fcenter}>
+          <IconButton
+            icon="cash-multiple"
+            style={{marginVertical: -5}}
+            size={30}
+            iconColor={MD2Colors.grey300}
           />
-        )}
-        data={logs.reverse()}
-        maxToRenderPerBatch={20}
-        initialNumToRender={20}
-        renderItem={({item, index}) => <LogItems item={item} index={index} />}
-        contentContainerStyle={{padding: 10}}
-        showsVerticalScrollIndicator={false}
-      />
+          <Text variant="bodySmall" style={{color: MD2Colors.grey300}}>
+            {money(transAll.paySuccess)}
+          </Text>
+          <Text variant="bodySmall" style={{color: MD2Colors.grey300}}>
+            Total Payment
+          </Text>
+        </View>
+        <View style={styles.fcenter}>
+          <IconButton
+            icon="cash-remove"
+            style={{marginVertical: -5}}
+            size={30}
+            iconColor={MD2Colors.grey300}
+          />
+          <Text variant="bodySmall" style={{color: MD2Colors.grey300}}>
+            {money(transAll.payFailed)}
+          </Text>
+          <Text variant="bodySmall" style={{color: MD2Colors.grey300}}>
+            Failed Payment
+          </Text>
+        </View>
+      </View>
+      <View
+        style={[
+          styles.frow,
+          {marginBottom: 20, justifyContent: 'space-evenly'},
+        ]}>
+        <View style={styles.fcenter}>
+          <IconButton
+            icon="cash-check"
+            style={{marginVertical: -5}}
+            size={30}
+            iconColor={MD2Colors.grey300}
+          />
+          <Text variant="bodySmall" style={{color: MD2Colors.grey300}}>
+            {money(transAll.success)}
+          </Text>
+          <Text variant="bodyMedium" style={{color: MD2Colors.grey300}}>
+            Successful Transactions
+          </Text>
+        </View>
+        <View style={styles.fcenter}>
+          <IconButton
+            icon="cash-remove"
+            style={{marginVertical: -5}}
+            size={30}
+            iconColor={MD2Colors.grey300}
+          />
+          <Text variant="bodySmall" style={{color: MD2Colors.grey300}}>
+            {money(transAll.failed)}
+          </Text>
+          <Text variant="bodyMedium" style={{color: MD2Colors.grey300}}>
+            Failed Transactions
+          </Text>
+        </View>
+      </View>
     </LinearGradient>
+  );
+
+  const Search = () => {
+    const [searchFilter, setSearchFilter] = useState<any>([]);
+    const [key, setKey] = useState('');
+    const searchFn = (text: string) => {
+      setKey(text);
+      let searchResult = filter(logs, (item: TLog) => {
+        let {title, desc, info} = item;
+        if (typeof text == 'string') {
+          if (
+            title.toLowerCase().includes(text) ||
+            desc.toLowerCase().includes(text) ||
+            info?.token ||
+            info?.transaction_date?.date.toString().includes(text)
+          ) {
+            return true;
+          }
+        } else {
+          if (
+            info?.amount ||
+            info?.requestId ||
+            info?.content?.transactions?.transactionId ||
+            info?.transaction_date?.date.toString().includes(text)
+          ) {
+            return true;
+          }
+        }
+      });
+      // console.log(JSON.stringify(searchResult, null, 2));
+      setSearchFilter(searchResult);
+    };
+
+    return (
+      <View>
+        <Searchbar
+          placeholder="Search"
+          value={key}
+          onChangeText={text => searchFn(text)}
+          style={{marginBottom: 10}}
+          iconColor={pry + '99'}
+        />
+        <FlatList
+          ItemSeparatorComponent={() => (
+            <View
+              style={{
+                borderColor: MD2Colors.grey300,
+                borderBottomWidth: 1,
+              }}
+            />
+          )}
+          data={key ? searchFilter : logs}
+          renderItem={({item, index}) => <LogItems item={item} index={index} />}
+        />
+      </View>
+    );
+  };
+
+  return (
+    <>
+      {action.show && <ViewLog />}
+      {route.params ? (
+        <Search />
+      ) : (
+        <LinearGradient colors={[sec + '44', sec + 'aa']} style={{flex: 1}}>
+          <FlatList
+            ListHeaderComponent={<UserStats />}
+            ItemSeparatorComponent={() => (
+              <View
+                style={{
+                  borderColor: MD2Colors.grey300,
+                  borderBottomWidth: 1,
+                }}
+              />
+            )}
+            data={logs.reverse()}
+            maxToRenderPerBatch={20}
+            initialNumToRender={20}
+            renderItem={({item, index}) => (
+              <LogItems item={item} index={index} />
+            )}
+            contentContainerStyle={{padding: 10}}
+            showsVerticalScrollIndicator={false}
+          />
+        </LinearGradient>
+      )}
+    </>
   );
 };
 

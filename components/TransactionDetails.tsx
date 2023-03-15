@@ -527,7 +527,7 @@ const TransactionDetails = ({route}: {route: any}) => {
         top: '30%',
       }}>
       <Text
-        variant="titleLarge"
+        variant="bodyLarge"
         style={{
           textAlign: 'center',
           fontWeight: 'bold',
@@ -535,7 +535,7 @@ const TransactionDetails = ({route}: {route: any}) => {
         Add to beneficiary
       </Text>
       <View style={[styles.fcenter]}>
-        <Text style={{color: pry, fontWeight: 'bold'}} variant="bodySmall">
+        <Text style={{color: pry, fontWeight: 'bold'}} variant="bodyMedium">
           {details.name}
         </Text>
         <Text style={{color: pry}} variant="bodySmall">
@@ -547,13 +547,29 @@ const TransactionDetails = ({route}: {route: any}) => {
       </View>
       <View style={[styles.fcenter, styles.frow, {flex: 1}]}>
         <Button
-          style={{margin: 5}}
-          labelStyle={{color: pry}}
-          mode="outlined"
-          onPress={() => setSwap(!swap)}>
-          Close
-        </Button>
-        <Button
+          onPress={async e => {
+            e.stopPropagation();
+            // await AsyncStorage.removeItem('beneficiary');
+            let beneficiary = await AsyncStorage.getItem('beneficiary');
+            if (beneficiary) {
+              let list: object = JSON.parse(beneficiary);
+              list = {
+                ...list,
+                [tInfo.type]: {
+                  ...list[tInfo.type] ,
+                  [details.biller]: route.params,
+                },
+              };
+              await AsyncStorage.setItem('beneficiary', JSON.stringify(list));
+            } else {
+              await AsyncStorage.setItem(
+                'beneficiary',
+                JSON.stringify({
+                  [tInfo.type]: {[details.biller]: route.params},
+                }),
+              );
+            }
+          }}
           icon="account-plus"
           style={{backgroundColor: pry, margin: 5}}
           labelStyle={{color: '#ddd'}}>
@@ -564,34 +580,46 @@ const TransactionDetails = ({route}: {route: any}) => {
   );
 
   const BeneficiaryModal = () => {
+    const [showModal, setShowModal] = useState(true);
     useEffect(() => {
       (async () => {
-        let type = await AsyncStorage.getItem(tInfo.type);
-        if (type) {
-          let parseType: [] = JSON.parse(data);
-          parseType.filter((item, index) => {
-            console.log(item, index);
+        let beneficiary = await AsyncStorage.getItem('beneficiary');
+        if (beneficiary) {
+          let benList: any = JSON.parse(beneficiary);
+          let keys = Object.keys(benList);
+
+          let item = keys.filter(item => {
+            if (item == tInfo.type) {
+              if (benList[tInfo.type][details.biller]) return true;
+            }
           });
+
+          setShowModal(item.length > 0 ? false : true);
         }
       })();
       // eslint-disable-next-line react-hooks/exhaustive-deps
     }, []);
 
     return (
-      <Modal
-        visible={swap}
-        animationType="slide"
-        onDismiss={() => setSwap(!swap)}
-        transparent={true}>
-        <TouchableOpacity
-          style={{
-            height: '100%',
-            backgroundColor: 'rgba(0, 0, 0, .3)',
-            padding: 20,
-          }}>
-          <SwapView />
-        </TouchableOpacity>
-      </Modal>
+      <>
+        {showModal && (
+          <Modal
+            visible={swap}
+            animationType="slide"
+            onDismiss={() => setSwap(!swap)}
+            transparent={true}>
+            <TouchableOpacity
+              onPress={() => setSwap(!swap)}
+              style={{
+                height: '100%',
+                backgroundColor: 'rgba(0, 0, 0, .3)',
+                padding: 20,
+              }}>
+              <SwapView />
+            </TouchableOpacity>
+          </Modal>
+        )}
+      </>
     );
   };
 
@@ -690,6 +718,7 @@ const TransactionDetails = ({route}: {route: any}) => {
       colors={[sec + '44', sec + 'aa']}
       style={{flex: 1, paddingHorizontal: 10}}>
       <ScrollView showsVerticalScrollIndicator={false}>
+        <BeneficiaryModal />
         <TransactionInfo />
       </ScrollView>
       {info.show && (

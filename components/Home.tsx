@@ -188,12 +188,12 @@ const Home = ({navigation}: {navigation: any}) => {
       </View>
       <View style={{marginTop: 16}}>
         <Text
-          variant="bodyLarge"
+          variant="bodyMedium"
           style={{color: MD2Colors.grey300, textAlign: 'center'}}>
           Balance
         </Text>
         <Text
-          variant="headlineMedium"
+          variant="titleLarge"
           style={{color: sec + 'ee', textAlign: 'center'}}>
           {show
             ? !Number.isInteger(user.balance)
@@ -314,8 +314,8 @@ const Home = ({navigation}: {navigation: any}) => {
             style={{marginVertical: -10}}
           />
           <View style={{flex: 1}}>
-            <Text variant="bodyLarge">{item.title}</Text>
-            <Text variant="bodyMedium">{item.desc}</Text>
+            <Text variant="bodyMedium">{item.title}</Text>
+            <Text variant="bodySmall">{item.desc}</Text>
           </View>
         </View>
       );

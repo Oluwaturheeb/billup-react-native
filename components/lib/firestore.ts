@@ -12,16 +12,20 @@ export const money = (num: number, currency = 'NGN') => {
   return format.format(num);
 };
 
-export const ref = (() => {
+export const ref = (num = 32, flw = true) => {
   let str = '';
   let characters =
     'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
   let charactersLength = characters.length;
-  for (let i = 0; i < 32; i++) {
+  for (let i = 0; i < num; i++) {
     str += characters.charAt(Math.floor(Math.random() * charactersLength));
   }
-  return `flw_tx_ref_${str}`;
-})();
+  return flw ? `flw_tx_ref_${str}` : str;
+};
+
+export const keys = (length: number, charLength = 10) => {
+  return Array(length).fill(ref(charLength, false));
+};
 
 export const updateFirebase = async (
   ...info: [id: string, balance: number, logs: object, type: boolean]

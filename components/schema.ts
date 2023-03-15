@@ -13,6 +13,7 @@ import {
   TransactionResponse,
   AdminData,
   AdminLog,
+  Beneficiary,
 } from './interfaces';
 
 export const UserSchema: User = {
@@ -196,6 +197,51 @@ export const statistics = {
       payFailedAmount: 0,
       successfulTransactionCount: 0,
       failedTransactionCount: 0,
+    },
+  },
+};
+
+export const beneficiarySchema: Beneficiary = {
+  keys: [''],
+  value: {
+    '': {
+      data: {
+        amount: 0,
+        billersCode: '',
+        country_code: '',
+        email: '',
+        operator_id: 0,
+        phone: '',
+        product_type_id: 0,
+        serviceID: '',
+        variation_code: 0,
+      },
+      details: {
+        amount: 0,
+        biller: '',
+        email: '',
+        name: '',
+        phone: '',
+      },
+      info: {
+        userInfo: {
+          Current_Bouquet: '',
+          Current_Bouquet_Code: '',
+          Customer_Name: '',
+          Customer_Number: 0,
+          Customer_Type: '0',
+          Due_Date: '',
+          Renewal_Amount: 0,
+          Status: '',
+        },
+        foreign: {},
+        image: '',
+        name: 'MTN Airtime VTU',
+        serviceID: '',
+        total: 0,
+        type: '',
+        xtra: 0,
+      },
     },
   },
 };

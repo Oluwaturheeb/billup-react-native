@@ -1,4 +1,4 @@
-import React, {useEffect, useRef, useState} from 'react';
+import React, {useRef} from 'react';
 import {NavigationContainer, useNavigation} from '@react-navigation/native';
 import {createNativeStackNavigator} from '@react-navigation/native-stack';
 import Welcome from './components/Welcome';
@@ -14,7 +14,6 @@ import {
   Avatar,
   IconButton,
   MD2Colors,
-  Searchbar,
   Text,
   TouchableRipple,
 } from 'react-native-paper';
@@ -29,18 +28,14 @@ import Admin from './components/Admin';
 import CustomerProfile from './components/CustomerProfile';
 import Settings from './components/Settings';
 import Statistics from './components/Statistics';
-import filter from 'lodash.filter';
-import {Logs as UserLog} from './components/interfaces';
+import Search from './components/Search';
+import AsyncStorage from '@react-native-async-storage/async-storage';
+import Beneficiary from './components/Beneficiary';
 
 const App = () => {
   const Stack = createNativeStackNavigator();
   const navRef = useRef();
-  const [search, setSearch] = useState({
-    show: false,
-    value: '',
-    filter: [],
-  });
-
+  
   const Headers = ({props}: {props: any}) => {
     return (
       <LinearGradient
@@ -57,7 +52,7 @@ const App = () => {
               <View style={[styles.frow]}>
                 <IconButton
                   icon="magnify"
-                  onPress={() => setSearch({...search, show: true})}
+                  onPress={() => props.navigation.navigate('Logs', 1)}
                   iconColor={sec}
                   style={{marginVertical: 10}}
                 />
@@ -80,7 +75,7 @@ const App = () => {
               <View style={[styles.frow]}>
                 <IconButton
                   icon="magnify"
-                  onPress={() => setSearch({...search, show: true})}
+                  onPress={() => props.navigation.navigate('Logs', 1)}
                   iconColor={sec}
                   style={{marginVertical: 10}}
                 />
@@ -190,7 +185,7 @@ const App = () => {
               <TouchableRipple
                 rippleColor={pry + '44'}
                 onPress={() => {
-                  nav.navigate('Home');
+                  nav.navigate('Beneficiary');
                   navRef.current.closeDrawer();
                 }}>
                 <View style={[styles.frow, styles.fVertCenter, styles.p2]}>
@@ -255,48 +250,27 @@ const App = () => {
                   </Text>
                 </View>
               </TouchableRipple>
+              <TouchableRipple
+                rippleColor={pry + '44'}
+                onPress={async () => {
+                  await AsyncStorage.clear();
+                  nav.navigate('Welcome');
+                  navRef.current.closeDrawer();
+                }}>
+                <View style={[styles.frow, styles.fVertCenter, styles.p2]}>
+                  <IconButton
+                    style={{marginVertical: -10}}
+                    iconColor={pry}
+                    icon="key-remove"
+                  />
+                  <Text variant="bodySmall" style={{color: pry}}>
+                    Logout
+                  </Text>
+                </View>
+              </TouchableRipple>
             </View>
           </View>
         )}
-      </LinearGradient>
-    );
-  };
-
-  const Search = () => {
-    const {user} = useUser();
-    console.log(user);
-    return (
-      <LinearGradient
-        colors={[pry + '11', pry + '33']}
-        style={{position: 'relative', height: '100%'}}>
-        <Searchbar
-          placeholder="Search"
-          value={search.value}
-          onChangeText={text => {
-            setSearch({...search, value: text});
-            /* let searchResult = filter(user.logs, (item: UserLog) => {
-              let {title, desc, info} = item;
-              console.log(item);
-              if (
-                title.toLowerCase().includes(text) ||
-                desc.toLowerCase().includes(text) ||
-                info?.Pin ||
-                info?.bonusToken ||
-                info?.token ||
-                info?.amount ||
-                info?.requestId
-              ) {
-                return true;
-              }
-            });
-
-            setSearch({
-              ...search,
-              filter: searchResult,
-            }); */
-          }}
-        />
-        <View />
       </LinearGradient>
     );
   };
@@ -305,7 +279,6 @@ const App = () => {
     <GestureHandlerRootView style={{flex: 1}}>
       <UserProvider>
         <NavigationContainer>
-          {search.show && <Search />}
           <DrawerLayout
             drawerWidth={240}
             drawerPosition="right"
@@ -319,6 +292,11 @@ const App = () => {
               screenOptions={{
                 header: (props: any) => <Headers props={props} />,
               }}>
+              <Stack.Screen
+                name="Beneficiary"
+                component={Beneficiary}
+                options={{title: 'Beneficiaries'}}
+              />
               <Stack.Screen
                 name="Welcome"
                 component={Welcome}
@@ -373,6 +351,11 @@ const App = () => {
                 name="Stats"
                 component={Statistics}
                 options={{title: 'Statistics'}}
+              />
+              <Stack.Screen
+                name="Search"
+                component={Search}
+                options={{title: 'Search', headerShown: false}}
               />
             </Stack.Navigator>
           </DrawerLayout>

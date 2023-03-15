@@ -89,7 +89,7 @@ export const PaymentModal = ({
           style={{
             backgroundColor: MD2Colors.grey200,
             padding: 20,
-            width: '100%',
+            width: '90%',
             borderRadius: 10,
             top: '24%',
             alignSelf: 'center',
@@ -155,7 +155,7 @@ export const PaymentModal = ({
                 });
               }}
               options={{
-                tx_ref: ref,
+                tx_ref: ref(),
                 amount: topUp.value,
                 authorization:
                   'FLWPUBK_TEST-3ffa62793f521b1e3134650390f7ea97-X',
