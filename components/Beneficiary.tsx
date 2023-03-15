@@ -28,25 +28,24 @@ const Beneficiary = ({navigation}: {navigation: any}) => {
   }, []);
 
   const BenyItem = ({item, index}: {item: BeneficiaryValue; index: number}) => {
-    console.log(item.info?.userInfo);
     return (
       <TouchableRipple
         key={index}
         rippleColor={pry + '44'}
-        onPress={() => {
-          navigation.navigate('Admin');
-        }}>
+        onPress={() =>
+          navigation.navigate(
+            item.info.type == 'airtime' ? 'Airtime' : 'Services',
+            item,
+          )
+        }>
         <View style={[styles.frow, {padding: 5, margin: 5}]}>
           <Avatar.Image source={{uri: item.info?.image}} size={36} />
           <View
             style={{
               marginLeft: 10,
-              // borderStartWidth: 2,
-              // borderStartColor: sec + 'cc',
-              // paddingLeft: 5,
             }}>
             <Text style={{color: pry}}>{item.details?.name}</Text>
-            {item.info.userInfo?.Customer_Name && (
+            {item.info?.userInfo?.Customer_Name && (
               <Text style={{color: pry}}>
                 {item.info.userInfo?.Customer_Name}
               </Text>

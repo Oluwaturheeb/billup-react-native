@@ -31,6 +31,7 @@ import Statistics from './components/Statistics';
 import Search from './components/Search';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import Beneficiary from './components/Beneficiary';
+import CodePush from 'react-native-code-push';
 
 const App = () => {
   const Stack = createNativeStackNavigator();
@@ -293,11 +294,6 @@ const App = () => {
                 header: (props: any) => <Headers props={props} />,
               }}>
               <Stack.Screen
-                name="Beneficiary"
-                component={Beneficiary}
-                options={{title: 'Beneficiaries'}}
-              />
-              <Stack.Screen
                 name="Welcome"
                 component={Welcome}
                 options={{headerShown: false}}
@@ -357,6 +353,11 @@ const App = () => {
                 component={Search}
                 options={{title: 'Search', headerShown: false}}
               />
+              <Stack.Screen
+                name="Beneficiary"
+                component={Beneficiary}
+                options={{title: 'Beneficiaries'}}
+              />
             </Stack.Navigator>
           </DrawerLayout>
         </NavigationContainer>
@@ -365,4 +366,16 @@ const App = () => {
   );
 };
 
-export default App;
+let codePushConfig = {
+  checkFrequency: CodePush.CheckFrequency.ON_APP_RESUME,
+  minimumBackgroundDuration: 60,
+  mandatoryInstallMode: CodePush.InstallMode.IMMEDIATE,
+  updateDialog: {
+    appendReleaseDescription: true,
+    title: 'Update available',
+    optionalUpdateMessage:
+      'Click update to upgrade your app to the latest version.',
+  },
+};
+
+export default CodePush(codePushConfig)(App);
