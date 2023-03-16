@@ -1,29 +1,19 @@
-import React, {useState, useEffect, memo} from 'react';
+import React, {useState, useEffect} from 'react';
 import {CommonActions} from '@react-navigation/native';
-import {
-  PermissionsAndroid,
-  StyleSheet,
-  View,
-  Dimensions,
-  Modal,
-  TouchableOpacity,
-} from 'react-native';
+import {PermissionsAndroid, StyleSheet, View, Dimensions} from 'react-native';
 import {
   Avatar,
   IconButton,
   MD2Colors,
   Text,
   TouchableRipple,
-  TextInput,
-  Button,
 } from 'react-native-paper';
-import {click, pry, sec} from './colors';
+import {pry, sec} from './colors';
 import styles from './styles';
 import {FlatList, Gesture, GestureDetector} from 'react-native-gesture-handler';
 import {Network, PaymentModal} from './services/Components';
-import {adminTransaction, money, ref, updateFirebase} from './lib/firestore';
+import {money} from './lib/firestore';
 import LinearGradient from 'react-native-linear-gradient';
-import PayWithFlutterwave from 'flutterwave-react-native';
 import Animated, {
   useAnimatedStyle,
   useSharedValue,
@@ -36,7 +26,7 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 // import {Notifications} from 'react-native-notifications';
 
 const height = Dimensions.get('screen').height;
-const width = Dimensions.get('screen').width;
+// const width = Dimensions.get('screen').width;
 
 const Home = ({navigation}: {navigation: any}) => {
   // Notifications.postLocalNotification({
@@ -253,6 +243,17 @@ const Home = ({navigation}: {navigation: any}) => {
         others.push(item);
       }
 
+      let icon =
+        item.identifier == 'airtime'
+          ? 'phone-sync-outline'
+          : item.identifier == 'data'
+          ? 'cellphone-nfc'
+          : item.identifier == 'electricity-bill'
+          ? 'flash-outline'
+          : item.identifier == 'tv-subscription'
+          ? 'cast-variant'
+          : 'school-outline';
+
       return (
         <TouchableRipple
           rippleColor={pry + 'cc'}
@@ -269,14 +270,22 @@ const Home = ({navigation}: {navigation: any}) => {
               styles.px2,
               {alignItems: 'center'},
             ]}>
-            <Text
-              variant="bodyMedium"
-              style={{
-                color: pry,
-                fontSize: 12,
-              }}>
-              {item.name}
-            </Text>
+            <View
+              style={[styles.frow, {alignItems: 'center', marginLeft: -10}]}>
+              <IconButton
+                style={{marginVertical: -10}}
+                icon={icon}
+                iconColor={pry + 'cc'}
+              />
+              <Text
+                variant="bodyMedium"
+                style={{
+                  color: pry,
+                  fontSize: 12,
+                }}>
+                {item.name}
+              </Text>
+            </View>
             <IconButton icon="arrow-right" iconColor={pry} />
           </View>
         </TouchableRipple>
@@ -361,8 +370,6 @@ const Home = ({navigation}: {navigation: any}) => {
       </GestureDetector>
     );
   };
-
-  // const Freeze = memo(() => <Services />, []);
 
   return (
     <View style={{flex: 1}}>
