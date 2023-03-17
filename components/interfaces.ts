@@ -32,7 +32,7 @@ export interface SelectedService {
 export interface SelectedVariation {
   variation_code: string;
   name: string;
-  variation_amount: string;
+  variation_amount: number;
   fixedPrice: string;
 }
 
@@ -205,18 +205,28 @@ export interface TransactionData {
   phone: string;
   product_type_id: number;
   serviceID: string;
-  variation_code: number;
+  variation_code: string;
 }
 
 export interface TransactionInfo {
-  foreign: {};
+  foreign?: TransactionInfoForeign;
   image: string;
   name: string;
   serviceID: string;
   total: number;
   type: string;
   xtra: number;
-  userInfo?: CustomerInfo;
+  action: string;
+  userInfo: CustomerInfo;
+  varName: string;
+}
+
+export interface TransactionInfoForeign {
+  service: string;
+  image: string;
+  product: string;
+  variation: string;
+  rate: number | null;
 }
 
 export interface CustomerInfo {

@@ -202,7 +202,7 @@ export const statistics = {
 };
 
 export const beneficiarySchema: Beneficiary = {
-  keys: [''],
+  keys: [],
   value: {
     '': {
       data: {
@@ -234,7 +234,13 @@ export const beneficiarySchema: Beneficiary = {
           Renewal_Amount: 0,
           Status: '',
         },
-        foreign: {},
+        foreign: {
+          service: '',
+          image: '',
+          product: '',
+          variation: '',
+          rate: 1 || null,
+        },
         image: '',
         name: 'MTN Airtime VTU',
         serviceID: '',

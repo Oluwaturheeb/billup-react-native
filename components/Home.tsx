@@ -23,19 +23,10 @@ import {useUser} from './lib/context';
 import {homeData} from './schema';
 import {ContentProp, Logs} from './interfaces';
 import AsyncStorage from '@react-native-async-storage/async-storage';
-// import {Notifications} from 'react-native-notifications';
 
 const height = Dimensions.get('screen').height;
-// const width = Dimensions.get('screen').width;
 
 const Home = ({navigation}: {navigation: any}) => {
-  // Notifications.postLocalNotification({
-  //   title: 'Test notty',
-  //   body: 'Hello world',
-  //   // category: 'Important',
-  //   // userInfo: {},
-  //   // fireDate: new Date(),
-  // });
   const [data, setData] = useState(homeData);
   const time = new Date().getHours();
   const {user} = useUser();

@@ -20,6 +20,7 @@ import {
   Avatar,
 } from 'react-native-paper';
 import {bg, pry, bod, sec, click} from './colors';
+import {BeneficiaryValue} from './interfaces';
 import axios from './lib/axios';
 import {useUser} from './lib/context';
 import {chunk, adminTransaction, money, updateFirebase} from './lib/firestore';
@@ -28,14 +29,14 @@ import styles from './styles';
 
 const TransactionDetails = ({route}: {route: any}) => {
   const {id, user} = useUser();
-  const {details, info: tInfo, data} = route.params;
+  const {details, info: tInfo, data}: BeneficiaryValue = route.params;
   const [btn, setBtn] = useState(false);
   const [status, setStatus] = useState(transactionResponse);
-  const [info, setInfo] = useState({show: false, msg: '', type: false});
-  const [swap, setSwap] = useState(true);
+  const [info, setInfo] = useState({show: false, msg: '', type: '', icon: ''});
+  const [swap, setSwap] = useState(false);
   const [showModal, toggleModal] = useState(false);
 
-  let beneficiaryType = tInfo?.name;
+  let beneficiaryType = tInfo.name;
   // date problem
   let rate = tInfo.foreign?.rate || 1;
   let total = tInfo.total * rate;
@@ -104,7 +105,11 @@ const TransactionDetails = ({route}: {route: any}) => {
       setInfo({
         show: true,
         msg: req.code == '1' ? 'Insufficient wallet balance' : msg,
-        type: req.code == '000' ? true : false,
+        type: req.code == '000' ? 'success' : 'failed',
+        icon:
+          req.code == '000'
+            ? 'checkbox-multiple-marked-circle-outline'
+            : 'close-circle',
       });
 
       setBtn(false);
@@ -552,11 +557,11 @@ const TransactionDetails = ({route}: {route: any}) => {
             // await AsyncStorage.removeItem('beneficiary');
             let beneficiary = await AsyncStorage.getItem('beneficiary');
             if (beneficiary) {
-              let list: object = JSON.parse(beneficiary);
+              let list: any = JSON.parse(beneficiary);
               list = {
                 ...list,
                 [tInfo.type]: {
-                  ...list[tInfo.type] ,
+                  ...list[tInfo.type],
                   [details.biller]: route.params,
                 },
               };
@@ -569,6 +574,8 @@ const TransactionDetails = ({route}: {route: any}) => {
                 }),
               );
             }
+            setSwap(false);
+            setInfo({show: true, msg: 'Added to beneficiary!', type: 'success', icon: 'information'});
           }}
           icon="account-plus"
           style={{backgroundColor: pry, margin: 5}}
@@ -590,7 +597,7 @@ const TransactionDetails = ({route}: {route: any}) => {
 
           let item = keys.filter(item => {
             if (item == tInfo.type) {
-              if (benList[tInfo.type][details.biller]) return true;
+              if (benList[tInfo.type][details.biller]) {return true;}
             }
           });
 
@@ -736,21 +743,12 @@ const TransactionDetails = ({route}: {route: any}) => {
             onIconPress={() => setInfo({...info, show: !info.show})}
             duration={30000}>
             <View style={[styles.frow, styles.fVertCenter]}>
-              {info.type ? (
-                <IconButton
-                  style={{margin: -10}}
-                  icon="checkbox-multiple-marked-circle-outline"
-                  size={20}
-                  iconColor="white"
-                />
-              ) : (
-                <IconButton
-                  style={{margin: -10}}
-                  icon="close-circle"
-                  size={20}
-                  iconColor={MD2Colors.red300}
-                />
-              )}
+              <IconButton
+                style={{margin: -10}}
+                icon={info.icon}
+                size={20}
+                iconColor={info.type =='success' ? 'white' : MD2Colors.red400}
+              />
               <Text
                 variant="bodySmall"
                 style={{color: 'white', marginLeft: 10}}>

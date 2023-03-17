@@ -132,7 +132,7 @@ def enableHermes = project.ext.react.get("enableHermes", false);
  */
 def reactNativeArchitectures() {
     def value = project.getProperties().get("reactNativeArchitectures")
-    return value ? value.split(",") : ["armeabi-v7a", "x86", "x86_64", "arm64-v8a"]
+    return value ? value.split(",") : ["armeabi-v7a", "arm64-v8a"]
 }
 
 android {
@@ -256,8 +256,6 @@ android {
 
 dependencies {
     implementation fileTree(dir: "libs", include: ["*.jar"])
-    implementation project(':react-native-notifications')
-    // implementation 'com.google.firebase:firebase-core:16.0.0'
 
     //noinspection GradleDynamicVersion
     implementation "com.facebook.react:react-native:+"  // From node_modules

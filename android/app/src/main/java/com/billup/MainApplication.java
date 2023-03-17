@@ -12,7 +12,6 @@ import com.facebook.soloader.SoLoader;
 import com.billup.newarchitecture.MainApplicationReactNativeHost;
 import java.lang.reflect.InvocationTargetException;
 import java.util.List;
-import com.wix.reactnativenotifications.RNNotificationsPackage;
 import com.microsoft.codepush.react.CodePush;
 
 

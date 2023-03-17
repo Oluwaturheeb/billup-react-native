@@ -23,13 +23,21 @@ import {money} from '../lib/firestore';
 import LinearGradient from 'react-native-linear-gradient';
 import {selectedVariation, service, contact, serviceData} from '../schema';
 import {useUser} from '../lib/context';
-import {SelectedService} from '../interfaces';
+import {BeneficiaryValue, ContentProp, SelectedService} from '../interfaces';
 
 const Services = ({navigation, route}: {navigation: any; route: any}) => {
   // get user info
   const {user} = useUser();
   // get current item and other items from the route params
-  const {item: curItem, others} = route.params;
+  const {
+    item: curItem,
+    others,
+    beny,
+  }: {
+    item: ContentProp;
+    others: ContentProp[];
+    beny: BeneficiaryValue;
+  } = route.params;
   // data collection
   // available services
   const [data, setData] = useState(serviceData);
@@ -69,6 +77,22 @@ const Services = ({navigation, route}: {navigation: any; route: any}) => {
         params: {identifier: curItem.identifier},
       });
       setData({...req.data, loading: true});
+
+      if (beny) {
+        setSelService({
+          ...service,
+          name: beny.info.name,
+          serviceID: beny.data.serviceID,
+          image: beny.info.image,
+        });
+        setSelServiceVar({
+          ...selServiceVar,
+          variation_code: beny.data.variation_code,
+          variation_amount: beny.data.amount,
+          name: beny.info.varName,
+        });
+        setContact(beny.details);
+      }
     })();
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
@@ -433,26 +457,30 @@ const Services = ({navigation, route}: {navigation: any; route: any}) => {
         cFee = Number(cFee);
         let total = amount + cFee * amount;
 
-        navigation.navigate('TransactionDetails', {
-          details: selectContact,
-          info: {
-            image: selService.image,
-            xtra: cFee,
-            name: selService.name,
-            userInfo: userInfo.data.content,
-            action: userAction.action === 'new' ? 'change' : 'renew',
-            varName: selServiceVar.name,
-            type: curItem.identifier,
-            total,
-          },
-          data: {
-            serviceID: selService.serviceID,
-            amount: total,
-            variation_code: selServiceVar.variation_code,
-            phone: selectContact.phone,
-            billersCode: selectContact.biller,
-          },
-        });
+        if (beny) {
+          navigation.navigate('TransactionDetails', beny);
+        } else {
+          navigation.navigate('TransactionDetails', {
+            details: selectContact,
+            info: {
+              image: selService.image,
+              xtra: cFee,
+              name: selService.name,
+              userInfo: userInfo.data.content,
+              action: userAction.action === 'new' ? 'change' : 'renew',
+              varName: selServiceVar.name,
+              type: curItem.identifier,
+              total,
+            },
+            data: {
+              serviceID: selService.serviceID,
+              amount: total,
+              variation_code: selServiceVar.variation_code,
+              phone: selectContact.phone,
+              billersCode: selectContact.biller,
+            },
+          });
+        }
       }
     } catch (error) {
       console.error(error);
@@ -581,12 +609,7 @@ const Services = ({navigation, route}: {navigation: any; route: any}) => {
                           <IconButton
                             icon="swap-vertical"
                             iconColor={sec}
-                            onPress={() =>
-                              // curItem.identifier == 'tv-subscription'
-                              //   ? (toggleModal(!showModal))
-                              //   : (setSelServiceVar(selectedVariation),
-                              toggleModal(!showModal)
-                            }
+                            onPress={() => toggleModal(!showModal)}
                           />
                         </View>
                       </View>

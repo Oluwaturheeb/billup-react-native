@@ -30,7 +30,7 @@ const Welcome = ({navigation}: {navigation: any}) => {
   }, []);
 
   // redirect after auth
-  if (id) setTimeout(() => navigation.navigate('Home'), 5000);
+  if (id || user?.email) setTimeout(() => navigation.navigate('Home'), 5000);
 
   // authentication
   const googleAuth = async () => {
@@ -46,6 +46,7 @@ const Welcome = ({navigation}: {navigation: any}) => {
 
       if (status) login = await GoogleSignin.getCurrentUser();
       else login = await GoogleSignin.signIn();
+
 
       let googleAuthUser = login?.user;
       if (googleAuthUser?.email !== '') {
@@ -68,8 +69,9 @@ const Welcome = ({navigation}: {navigation: any}) => {
             setId(doc.id);
             await AsyncStorage.setItem('id', doc.id);
           })
-          setUser(authUser);
         }
+        console.log(authUser);
+        setUser(authUser);
       }
     } catch (error) {
       console.error(error);

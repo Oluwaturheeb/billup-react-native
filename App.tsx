@@ -254,7 +254,7 @@ const App = () => {
               <TouchableRipple
                 rippleColor={pry + '44'}
                 onPress={async () => {
-                  await AsyncStorage.clear();
+                  await AsyncStorage.removeItem('id');
                   nav.navigate('Welcome');
                   navRef.current.closeDrawer();
                 }}>

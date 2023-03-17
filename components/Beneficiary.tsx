@@ -2,11 +2,18 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 import React, {useState, useEffect} from 'react';
 import {View} from 'react-native';
 import LinearGradient from 'react-native-linear-gradient';
-import {Avatar, MD2Colors, Text, TouchableRipple} from 'react-native-paper';
+import {
+  Avatar,
+  IconButton,
+  MD2Colors,
+  Text,
+  TouchableRipple,
+} from 'react-native-paper';
 import {pry, sec} from './colors';
 import {BeneficiaryValue} from './interfaces';
 import {beneficiarySchema} from './schema';
 import styles from './styles';
+import { capFirst } from './lib/firestore';
 
 const Beneficiary = ({navigation}: {navigation: any}) => {
   const [beny, setBeny] = useState(beneficiarySchema);
@@ -28,32 +35,41 @@ const Beneficiary = ({navigation}: {navigation: any}) => {
   }, []);
 
   const BenyItem = ({item, index}: {item: BeneficiaryValue; index: number}) => {
+    let name = item.info.type.split('-');
     return (
-      <TouchableRipple
-        key={index}
-        rippleColor={pry + '44'}
-        onPress={() =>
-          navigation.navigate(
-            item.info.type == 'airtime' ? 'Airtime' : 'Services',
-            item,
-          )
-        }>
-        <View style={[styles.frow, {padding: 5, margin: 5}]}>
-          <Avatar.Image source={{uri: item.info?.image}} size={36} />
-          <View
-            style={{
-              marginLeft: 10,
-            }}>
-            <Text style={{color: pry}}>{item.details?.name}</Text>
-            {item.info?.userInfo?.Customer_Name && (
-              <Text style={{color: pry}}>
-                {item.info.userInfo?.Customer_Name}
-              </Text>
-            )}
-            <Text style={{color: pry}}>{item.details?.biller}</Text>
+      <View key={index}>
+        <TouchableRipple
+          rippleColor={pry + '44'}
+          onPress={() =>
+            navigation.navigate(
+              item.info.type == 'airtime' ? 'Airtime' : 'Services',
+              {
+                beny: item,
+                other: [],
+                item: {
+                  identifier: item.info.type,
+                  name: capFirst(name[0]) + ' ' + capFirst(name[1]),
+                },
+              },
+            )
+          }>
+          <View style={[styles.frow, {padding: 5, margin: 5}]}>
+            <Avatar.Image source={{uri: item.info?.image}} size={36} />
+            <View
+              style={{
+                marginLeft: 10,
+              }}>
+              <Text style={{color: pry}}>{item.details?.name}</Text>
+              {item.info?.userInfo?.Customer_Name && (
+                <Text style={{color: pry}}>
+                  {item.info.userInfo?.Customer_Name}
+                </Text>
+              )}
+              <Text style={{color: pry}}>{item.details?.biller}</Text>
+            </View>
           </View>
-        </View>
-      </TouchableRipple>
+        </TouchableRipple>
+      </View>
     );
   };
 
@@ -79,7 +95,10 @@ const Beneficiary = ({navigation}: {navigation: any}) => {
           })}
         </>
       ) : (
-        <Text variant="bodyLarge">Nothing here</Text>
+        <View style={[styles.fcenter, {flex: 1}]}>
+          <IconButton size={120} icon="account-group" iconColor={pry + 'bb'} />
+          <Text variant="bodyLarge">Nothing here</Text>
+        </View>
       )}
     </LinearGradient>
   );

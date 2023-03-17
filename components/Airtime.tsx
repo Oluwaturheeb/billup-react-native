@@ -26,15 +26,22 @@ import {
   service,
   serviceData,
 } from './schema';
-import {ContentProp, selectContactService} from './interfaces';
+import {BeneficiaryValue, ContentProp} from './interfaces';
 import LinearGradient from 'react-native-linear-gradient';
 import {useUser} from './lib/context';
 import {money} from './lib/firestore';
 import filter from 'lodash.filter';
 
 const Airtime = ({navigation, route}: {navigation: any; route: any}) => {
-  const {item: curItem, others}: {curItem: ContentProp; others: ContentProp[]} =
-    route.params;
+  const {
+    item: curItem,
+    others,
+    beny,
+  }: {
+    item: ContentProp;
+    others: ContentProp[];
+    beny: BeneficiaryValue;
+  } = route.params;
   const [data, setData] = useState(serviceData);
   const [selectedService, setSelectedService] = useState(service);
   const {user} = useUser();
@@ -54,6 +61,15 @@ const Airtime = ({navigation, route}: {navigation: any; route: any}) => {
         params: {identifier: curItem.identifier},
       });
       setData({...data, loading: true});
+      if (beny) {
+        setSelectedService({
+          ...selectedService,
+          serviceID: beny.data.serviceID,
+          image: beny.info.image,
+          name: beny.info.name,
+          convinience_fee: beny.info.xtra,
+        });
+      }
     })();
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
@@ -86,11 +102,15 @@ const Airtime = ({navigation, route}: {navigation: any; route: any}) => {
     const [msg, setMsg] = useState({msg: ''});
 
     useEffect(() => {
-      fData.product.name === 'Mobile Data' &&
-        setContact({
-          ...selectContact,
-          amount: fData.variation.variation_amount,
-        });
+      if (beny) {
+        setContact(beny.details);
+      } else {
+        fData.product.name === 'Mobile Data' &&
+          setContact({
+            ...selectContact,
+            amount: fData.variation.variation_amount,
+          });
+      }
       // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [fData]);
 
@@ -129,6 +149,7 @@ const Airtime = ({navigation, route}: {navigation: any; route: any}) => {
       // maximum validation
       if (
         fData.country.name == '' &&
+        !beny &&
         selectContact.amount > Number(selectedService.maximum_amount)
       ) {
         setMsg({
@@ -186,49 +207,68 @@ const Airtime = ({navigation, route}: {navigation: any; route: any}) => {
       }
 
       if (go) {
-        let rate = fData.variation.variation_rate;
-        let amount = Number(selectContact.amount),
-          conFee = selectedService.convinience_fee || convFee;
-
-        let cFee = conFee.includes('%')
-          ? Number(conFee.slice(0, 1) / 100)
-          : Number(conFee.slice(1, -1));
-
-        // ? selectedService.convinience_fee
-        // : fData.variation?.convinience_fee,
-        cFee = Number(cFee);
-        let total = amount + cFee * amount;
-
         //go to transaction preview page
-        navigation.navigate('TransactionDetails', {
-          details: selectContact,
-          info: {
-            image: selectedService.image,
-            xtra: cFee,
-            name: selectedService.name,
-            serviceID: selectedService.serviceID,
-            type: curItem.identifier,
-            total,
-            foreign: {
-              service: fData.operator.name,
-              image: fData.operator.operator_image,
-              product: fData.product.name,
-              variation: fData.variation.name,
-              rate: fData.operator.name !== '' ? rate : 1,
+        if (beny) {
+          navigation.navigate('TransactionDetails', {
+            ...beny,
+            details: {
+              ...beny.details,
+              amount: selectContact.amount,
             },
-          },
-          data: {
-            serviceID: selectedService.serviceID,
-            variation_code: fData.variation.variation_code,
-            amount: selectContact.amount,
-            phone: selectContact.biller,
-            operator_id: fData.operator.operator_id,
-            country_code: fData.country.code,
-            product_type_id: fData.product.product_type_id,
-            email: selectContact.email,
-            billersCode: selectContact.biller,
-          },
-        });
+            data: {
+              ...beny.data,
+              amount: selectContact.amount,
+            },
+            info: {
+              ...beny.info,
+              total:
+                selectContact.amount * beny.info.foreign?.rate + beny.info.xtra,
+            },
+          });
+        } else {
+          let rate = fData.variation.variation_rate;
+          let amount = Number(selectContact.amount),
+            conFee = selectedService.convinience_fee;
+
+          let cFee = conFee.includes('%')
+            ? Number(conFee.slice(0, 1) / 100)
+            : Number(conFee.slice(1, -1));
+
+          // ? selectedService.convinience_fee
+          // : fData.variation?.convinience_fee,
+          cFee = Number(cFee);
+          let total = amount + cFee * amount;
+
+          navigation.navigate('TransactionDetails', {
+            details: selectContact,
+            info: {
+              image: selectedService.image,
+              xtra: cFee,
+              name: selectedService.name,
+              serviceID: selectedService.serviceID,
+              type: curItem.identifier,
+              total,
+              foreign: {
+                service: fData.operator.name,
+                image: fData.operator.operator_image,
+                product: fData.product.name,
+                variation: fData.variation.name,
+                rate: fData.operator.name !== '' ? rate : 1,
+              },
+            },
+            data: {
+              serviceID: selectedService.serviceID,
+              variation_code: fData.variation.variation_code,
+              amount: selectContact.amount,
+              phone: selectContact.biller,
+              operator_id: fData.operator.operator_id,
+              country_code: fData.country.code,
+              product_type_id: fData.product.product_type_id,
+              email: selectContact.email,
+              billersCode: selectContact.biller,
+            },
+          });
+        }
       }
     };
 
@@ -406,7 +446,11 @@ const Airtime = ({navigation, route}: {navigation: any; route: any}) => {
             </Text>
           )}
 
-          <Button mode="contained" style={css.button} labelStyle={{color: sec}} onPress={submitForm}>
+          <Button
+            mode="contained"
+            style={css.button}
+            labelStyle={{color: sec}}
+            onPress={submitForm}>
             Continue
           </Button>
         </View>

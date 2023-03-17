@@ -84,3 +84,5 @@ export const dateFormat = (date: number) => {
 };
 
 export const chunk = (string: string) => string.match(/.{1,4}/g)?.join(' - ');
+export const capFirst = (str: string) =>
+  str ? str.replace(str[0], str[0].toUpperCase()) : '';
