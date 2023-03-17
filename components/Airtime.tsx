@@ -75,7 +75,7 @@ const Airtime = ({navigation, route}: {navigation: any; route: any}) => {
   }, []);
 
   // service vartiation
-  const ServiceVariation = ({item}: {item: selectContactService}) => {
+  const ServiceVariation = ({item}: {item: any}) => {
     return (
       <Card
         onPress={() => {
@@ -274,11 +274,11 @@ const Airtime = ({navigation, route}: {navigation: any; route: any}) => {
 
     return (
       <View style={css.inputContainer}>
-        <View style={[styles.frow, styles.fcenter]}>
+        <View style={[styles.frow, styles.fcenter, {marginBottom: 5}]}>
           <Avatar.Image
             source={{uri: selectedService.image}}
-            size={60}
-            style={{backgroundColor: pry}}
+            size={48}
+            style={{backgroundColor: pry, marginRight: 10}}
           />
           <Text
             variant="titleLarge"

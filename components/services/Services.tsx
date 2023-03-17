@@ -447,19 +447,33 @@ const Services = ({navigation, route}: {navigation: any; route: any}) => {
       }
 
       if (go === true) {
-        let amount = Number(selectContact.amount),
-          conFee = selService.convinience_fee;
-
-        let cFee = conFee.includes('%')
-          ? Number(conFee.slice(0, 1) / 100)
-          : Number(conFee.slice(1, -1));
-
-        cFee = Number(cFee);
-        let total = amount + cFee * amount;
-
         if (beny) {
-          navigation.navigate('TransactionDetails', beny);
+          navigation.navigate('TransactionDetails', {...beny,
+            details: {
+              ...beny.details,
+              amount: selectContact.amount,
+            },
+            info: {
+              ...beny.info,
+              varName: selServiceVar.name,
+              total: selServiceVar.variation_amount + beny.info.xtra,
+            },
+            data: {
+              ...beny.data,
+              variation_code: selServiceVar.variation_code,
+              amount: selServiceVar.variation_amount,
+            },
+          });
         } else {
+          let amount = Number(selectContact.amount),
+            conFee = selService.convinience_fee;
+
+          let cFee = conFee.includes('%')
+            ? Number(conFee.slice(0, 1) / 100)
+            : Number(conFee.slice(1, -1));
+
+          cFee = Number(cFee);
+          let total = amount + cFee * amount;
           navigation.navigate('TransactionDetails', {
             details: selectContact,
             info: {
@@ -574,15 +588,23 @@ const Services = ({navigation, route}: {navigation: any; route: any}) => {
               <>
                 {showForm && (
                   <View style={css.inputContainer}>
-                    <Text
-                      style={{
-                        color: sec,
-                        textAlign: 'center',
-                        marginVertical: 5,
-                      }}
-                      variant="titleLarge">
-                      {selService?.name}
-                    </Text>
+                    <View
+                      style={[styles.frow, styles.fcenter, {marginBottom: 10}]}>
+                      <Avatar.Image
+                        source={{uri: selService.image}}
+                        size={48}
+                        style={{backgroundColor: pry, marginRight: 10}}
+                      />
+                      <Text
+                        variant="titleLarge"
+                        style={{
+                          color: sec,
+                          textAlign: 'center',
+                          marginVertical: 5,
+                        }}>
+                        {selService.name}
+                      </Text>
+                    </View>
                     {selServiceVar?.variation_code && (
                       <View
                         style={[

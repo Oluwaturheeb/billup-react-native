@@ -311,7 +311,7 @@ const TransactionDetails = ({route}: {route: any}) => {
                 Rate
               </Text>
               <Text style={{color: pry}} variant="bodySmall">
-                {money(tInfo.foreign.rate)}
+                {money(tInfo.foreign?.rate || 0)}
               </Text>
             </View>
             <View
