@@ -4,8 +4,8 @@ export interface HomeDataProps {
 }
 
 export interface ContentProp {
-  identifier: String;
-  name: String;
+  identifier: string;
+  name: string;
 }
 
 export interface User {
@@ -238,6 +238,7 @@ export interface CustomerInfo {
   Due_Date: string;
   Renewal_Amount: number;
   Status: string;
+  Address: string;
 }
 
 export interface BeneficiaryValue {

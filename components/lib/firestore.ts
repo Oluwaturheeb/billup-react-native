@@ -23,7 +23,7 @@ export const ref = (num = 32, flw = true) => {
   return flw ? `flw_tx_ref_${str}` : str;
 };
 
-export const keys = (length: number, charLength = 10) => {
+export const genKeys = (length: number, charLength = 10) => {
   return Array(length).fill(ref(charLength, false));
 };
 

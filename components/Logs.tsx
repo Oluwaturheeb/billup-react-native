@@ -1,4 +1,4 @@
-import React, {useState, useMemo} from 'react';
+import React, {useState, useMemo, useEffect} from 'react';
 import {FlatList, Modal, View} from 'react-native';
 import LinearGradient from 'react-native-linear-gradient';
 import {
@@ -14,7 +14,7 @@ import {useUser} from './lib/context';
 import styles from './styles';
 import {Logs as TLog, TransactionResponse} from './interfaces';
 import {logs as SLog} from './schema';
-import {chunk, dateFormat, money} from './lib/firestore';
+import {chunk, dateFormat, money, users} from './lib/firestore';
 import {ScrollView} from 'react-native-gesture-handler';
 import filter from 'lodash.filter';
 
@@ -32,7 +32,7 @@ const Logs = ({route}: {route: any}) => {
 
   const ViewLog = () => {
     let {data} = action;
-    let info: TransactionResponse = data.info;
+    let info: TransactionResponse | undefined = data.info;
 
     return (
       <Modal
@@ -90,14 +90,14 @@ const Logs = ({route}: {route: any}) => {
                 style={{textAlign: 'center', color: pry}}>
                 {data.desc}
               </Text>
-              {!info.cards && info.purchased_code && (
+              {!info?.cards && info?.purchased_code && (
                 <Text
                   variant="bodyLarge"
                   style={{textAlign: 'center', color: click}}>
                   {chunk(info.purchased_code.split(': ')[1])}
                 </Text>
               )}
-              {info.cards && info.purchased_code && (
+              {info?.cards && info?.purchased_code && (
                 <>
                   {info.cards.map((item, index) => (
                     <View
@@ -159,7 +159,7 @@ const Logs = ({route}: {route: any}) => {
                     {data.status === 'failed' ? 'Failed' : 'Successful'}
                   </Text>
                 </View>
-                {info.code != '1' && info.code && (
+                {info?.code != '1' && info?.code && (
                   <>
                     <View style={[styles.frow, styles.fspace, styles.p1]}>
                       <Text
@@ -219,7 +219,8 @@ const Logs = ({route}: {route: any}) => {
     );
   };
 
-  const LogItems = ({item, index}: {item: TLog; index: number}) => {
+  const LogItems = ({item, index}: {item: any; index: number}) => {
+    if (route.params.account != 'user') item = item.transaction;
     return (
       <TouchableRipple
         key={index}
@@ -229,19 +230,19 @@ const Logs = ({route}: {route: any}) => {
         <View style={[styles.frow, {alignItems: 'center'}]}>
           <IconButton
             icon={
-              item.status !== 'failed'
+              item?.status !== 'failed'
                 ? 'checkbox-multiple-marked-circle-outline'
                 : 'close-outline'
             }
             iconColor={
-              item.status !== 'failed' ? pry + '99' : MD2Colors.redA200
+              item?.status !== 'failed' ? pry + '99' : MD2Colors.redA200
             }
             size={30}
             style={{marginVertical: -10}}
           />
           <View style={{flex: 1}}>
-            <Text variant="bodySmall">{item.title}</Text>
-            <Text variant="bodySmall">{item.desc}</Text>
+            <Text variant="bodySmall">{item?.title}</Text>
+            <Text variant="bodySmall">{item?.desc}</Text>
           </View>
         </View>
       </TouchableRipple>
@@ -364,18 +365,30 @@ const Logs = ({route}: {route: any}) => {
   const Search = () => {
     const [searchFilter, setSearchFilter] = useState<any>([]);
     const [key, setKey] = useState('');
+    const [data, setData] = useState<{
+      loading: boolean;
+      data: any;
+    }>({loading: true, data: logs});
+
     const searchFn = (text: string) => {
       setKey(text);
-      let searchResult = filter(logs, (item: TLog) => {
-        let {title, desc, info} = item;
-        if (typeof text == 'string') {
+      let searchResult: TLog[] = [];
+      filter(data.data, (item: any) => {
+        if (route.params.account != 'user') {
+          var obj: TLog = item.transaction;
+        } else {
+          var obj: TLog = item;
+        }
+        let {title, desc, info} = obj;
+
+        if (typeof text === 'string') {
           if (
             title.toLowerCase().includes(text) ||
             desc.toLowerCase().includes(text) ||
             info?.token ||
             info?.transaction_date?.date.toString().includes(text)
           ) {
-            return true;
+            searchResult.push(obj);
           }
         } else {
           if (
@@ -384,13 +397,26 @@ const Logs = ({route}: {route: any}) => {
             info?.content?.transactions?.transactionId ||
             info?.transaction_date?.date.toString().includes(text)
           ) {
-            return true;
+            searchResult.push(obj);
           }
         }
       });
-      // console.log(JSON.stringify(searchResult, null, 2));
       setSearchFilter(searchResult);
     };
+
+    const reRender = data.loading === false && true;
+    useEffect(() => {
+      (async () => {
+        if (route.params.account != 'user') {
+          let trans: any = await users.doc('PXlO3KDmrEwbDTwsprSM').get();
+          trans = trans.data();
+          setData({
+            loading: false,
+            data: trans.payments.concat(trans.transactions),
+          });
+        }
+      })();
+    }, [reRender]);
 
     return (
       <View>
@@ -410,7 +436,7 @@ const Logs = ({route}: {route: any}) => {
               }}
             />
           )}
-          data={key ? searchFilter : logs}
+          data={key ? searchFilter : data.data}
           renderItem={({item, index}) => <LogItems item={item} index={index} />}
         />
       </View>
@@ -420,7 +446,7 @@ const Logs = ({route}: {route: any}) => {
   return (
     <>
       {action.show && <ViewLog />}
-      {route.params ? (
+      {route.params != undefined ? (
         <Search />
       ) : (
         <LinearGradient colors={[sec + '44', sec + 'aa']} style={{flex: 1}}>

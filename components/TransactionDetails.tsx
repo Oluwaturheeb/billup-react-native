@@ -20,15 +20,21 @@ import {
   Avatar,
 } from 'react-native-paper';
 import {bg, pry, bod, sec, click} from './colors';
-import {BeneficiaryValue} from './interfaces';
+import {BeneficiaryValue, TransactionResponse} from './interfaces';
 import axios from './lib/axios';
 import {useUser} from './lib/context';
 import {chunk, adminTransaction, money, updateFirebase} from './lib/firestore';
-import {transactionResponse} from './schema';
+import {transactionResponse, UserSchema} from './schema';
 import styles from './styles';
 
-const TransactionDetails = ({route}: {route: any}) => {
-  const {id, user} = useUser();
+const TransactionDetails = ({
+  route,
+  navigation,
+}: {
+  route: any;
+  navigation: any;
+}) => {
+  const {id, user, setUser, setId} = useUser();
   const {details, info: tInfo, data}: BeneficiaryValue = route.params;
   const [btn, setBtn] = useState(false);
   const [status, setStatus] = useState(transactionResponse);
@@ -55,6 +61,21 @@ const TransactionDetails = ({route}: {route: any}) => {
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [status.code]);
+
+  if (status.code === '000') {
+    if (status.content.transactions.status == 'pending') {
+      let interval = setInterval(async () => {
+        let {data}: {data: TransactionResponse} = await axios.post('/requery', {
+          request_id: status.requestId,
+        });
+
+        if (data.content.transactions.status == 'delivered') {
+          setStatus(data);
+          clearInterval(interval);
+        }
+      }, 4000);
+    }
+  }
 
   const transBtnFunc = async () => {
     setBtn(true);
@@ -140,7 +161,9 @@ const TransactionDetails = ({route}: {route: any}) => {
                   <Text style={{color: pry}} variant="bodySmall">
                     Token
                   </Text>
-                  {status.purchased_code && (
+                  {status.content.transactions.status != 'delivered' ? (
+                    <Button mode="text" loading={btn} children={undefined} />
+                  ) : (
                     <Text
                       variant="bodyLarge"
                       style={{textAlign: 'center', color: click}}>
@@ -237,7 +260,11 @@ const TransactionDetails = ({route}: {route: any}) => {
             Name
           </Text>
           <Text style={{color: pry}} variant="bodySmall">
-            {details.name}
+            {tInfo.type == 'electricity-bill'
+              ? tInfo.userInfo.Customer_Name
+              : tInfo.type == 'education'
+              ? tInfo.userInfo.Customer_Name
+              : details.name}
           </Text>
         </View>
         <View
@@ -575,7 +602,12 @@ const TransactionDetails = ({route}: {route: any}) => {
               );
             }
             setSwap(false);
-            setInfo({show: true, msg: 'Added to beneficiary!', type: 'success', icon: 'information'});
+            setInfo({
+              show: true,
+              msg: 'Added to beneficiary!',
+              type: 'success',
+              icon: 'information',
+            });
           }}
           icon="account-plus"
           style={{backgroundColor: pry, margin: 5}}
@@ -597,7 +629,9 @@ const TransactionDetails = ({route}: {route: any}) => {
 
           let item = keys.filter(item => {
             if (item == tInfo.type) {
-              if (benList[tInfo.type][details.biller]) {return true;}
+              if (benList[tInfo.type][details.biller]) {
+                return true;
+              }
             }
           });
 
@@ -635,7 +669,10 @@ const TransactionDetails = ({route}: {route: any}) => {
     const fn2FA = async () => {
       console.log(text.text == user.TWOFA, text.text, text.tries);
       if (text.tries === 0) {
-        return;
+        await AsyncStorage.removeItem('id');
+        setUser(UserSchema);
+        setId('');
+        navigation.navigate('Welcome');
       }
       if (user.TWOFA == text.text) {
         toggleModal(!showModal);
@@ -669,7 +706,7 @@ const TransactionDetails = ({route}: {route: any}) => {
                 width: '80%',
                 marginLeft: '10%',
                 borderRadius: 5,
-                minHeight: '30%',
+                height: '35%',
                 top: '30%',
               }}>
               <Text variant="titleLarge" style={{textAlign: 'center'}}>
@@ -685,12 +722,8 @@ const TransactionDetails = ({route}: {route: any}) => {
                       backgroundColor: 'transparent',
                       letterSpacing: 30,
                       width: 150,
-                      // textAlign: 'center',
                     }}
-                    outlineColor={pry}
-                    activeUnderlineColor={pry}
-                    underlineColor={pry}
-                    textColor={pry}
+                    keyboardType="number-pad"
                     placeholderTextColor={pry}
                   />
                 </View>
@@ -747,7 +780,7 @@ const TransactionDetails = ({route}: {route: any}) => {
                 style={{margin: -10}}
                 icon={info.icon}
                 size={20}
-                iconColor={info.type =='success' ? 'white' : MD2Colors.red400}
+                iconColor={info.type == 'success' ? 'white' : MD2Colors.red400}
               />
               <Text
                 variant="bodySmall"

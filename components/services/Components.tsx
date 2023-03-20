@@ -8,7 +8,7 @@ import {
   Text,
   TextInput,
 } from 'react-native-paper';
-import {click, pry, sec} from '../colors';
+import {click, pry} from '../colors';
 import styles from '../styles';
 import NetInfo from '@react-native-community/netinfo';
 import LinearGradient from 'react-native-linear-gradient';
@@ -18,7 +18,7 @@ import PayWithFlutterwave from 'flutterwave-react-native';
 
 export const Network = () => {
   const [net, setNet] = useState(true);
-  NetInfo.fetch().then(con => setNet(con.isInternetReachable));
+  NetInfo.fetch().then(con => setNet(con.isInternetReachable ? true : false));
   return (
     <View
       style={[
@@ -26,7 +26,6 @@ export const Network = () => {
         {zIndex: 1000, position: 'absolute', bottom: '0%', width: '100%'},
       ]}>
       <Snackbar
-        style={{color: sec}}
         elevation={2}
         visible={net === false}
         onDismiss={() => setNet(true)}

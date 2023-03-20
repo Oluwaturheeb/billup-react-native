@@ -35,11 +35,9 @@ import filter from 'lodash.filter';
 const Airtime = ({navigation, route}: {navigation: any; route: any}) => {
   const {
     item: curItem,
-    others,
     beny,
   }: {
     item: ContentProp;
-    others: ContentProp[];
     beny: BeneficiaryValue;
   } = route.params;
   const [data, setData] = useState(serviceData);
@@ -886,7 +884,7 @@ const Airtime = ({navigation, route}: {navigation: any; route: any}) => {
           )}
           {hideServices && !showContactForm && <ServiceVariationModal />}
           {!hideServices && showContactForm && <ContactInfo />}
-          <Others items={others} except={curItem.identifier} />
+          <Others />
         </LinearGradient>
       )}
       <Network />

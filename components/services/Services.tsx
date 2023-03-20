@@ -21,9 +21,20 @@ import {selectContactPhone} from 'react-native-select-contact';
 import filter from 'lodash.filter';
 import {money} from '../lib/firestore';
 import LinearGradient from 'react-native-linear-gradient';
-import {selectedVariation, service, contact, serviceData} from '../schema';
+import {
+  selectedVariation,
+  service,
+  contact,
+  serviceData,
+  customerInfoSchema,
+} from '../schema';
 import {useUser} from '../lib/context';
-import {BeneficiaryValue, ContentProp, SelectedService} from '../interfaces';
+import {
+  BeneficiaryValue,
+  ContentProp,
+  CustomerInfo,
+  SelectedService,
+} from '../interfaces';
 
 const Services = ({navigation, route}: {navigation: any; route: any}) => {
   // get user info
@@ -31,20 +42,21 @@ const Services = ({navigation, route}: {navigation: any; route: any}) => {
   // get current item and other items from the route params
   const {
     item: curItem,
-    others,
     beny,
   }: {
     item: ContentProp;
-    others: ContentProp[];
     beny: BeneficiaryValue;
   } = route.params;
   // data collection
   // available services
   const [data, setData] = useState(serviceData);
   // this is for verrifying meter and smartcard number
-  const [userInfo, setUserInfo] = useState({
+  const [customerInfo, setCustomerInfo] = useState<{
+    loading: boolean;
+    data: {code: string; content: CustomerInfo};
+  }>({
     loading: false,
-    data: {code: '', content: {}},
+    data: {code: '', content: customerInfoSchema},
   });
 
   // service var
@@ -68,7 +80,7 @@ const Services = ({navigation, route}: {navigation: any; route: any}) => {
 
   // action true = renew
   // action false = new
-  const [userAction, setUserAction] = useState({action: '', data: []});
+  const [userAction, setUserAction] = useState({action: ''});
 
   // get service variation
   useEffect(() => {
@@ -95,7 +107,7 @@ const Services = ({navigation, route}: {navigation: any; route: any}) => {
       }
     })();
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+  }, [curItem.identifier]);
 
   // query meter, smartcard, and user information
   useEffect(() => {
@@ -106,13 +118,13 @@ const Services = ({navigation, route}: {navigation: any; route: any}) => {
     ) {
       (async () => {
         const verifyNumber = async () => {
-          setUserInfo({...userInfo, loading: true});
+          setCustomerInfo({...customerInfo, loading: true});
           let {data} = await axios.post('/merchant-verify', {
             billersCode: selectContact.biller,
             serviceID: selService.serviceID,
             type: selServiceVar.variation_code,
           });
-          setUserInfo({loading: false, data});
+          setCustomerInfo({loading: false, data});
           setServiceActionModal(!serviceActionModal);
         };
 
@@ -151,7 +163,7 @@ const Services = ({navigation, route}: {navigation: any; route: any}) => {
   };
 
   const ServiceAction = () => {
-    let data = userInfo.data.content;
+    let data = customerInfo.data.content;
     return (
       <Modal
         visible={serviceActionModal}
@@ -222,8 +234,8 @@ const Services = ({navigation, route}: {navigation: any; route: any}) => {
                             ...selectContact,
                             amount: data.Renewal_Amount,
                           });
-                          setSelServiceVar(data);
-                          setUserAction({action: 'new', data: []});
+                          // setSelServiceVar(data);
+                          setUserAction({action: 'new'});
                           toggleModal(true);
                           setServiceActionModal(!serviceActionModal);
                         }}>
@@ -236,7 +248,7 @@ const Services = ({navigation, route}: {navigation: any; route: any}) => {
                             ...selectContact,
                             amount: data.Renewal_Amount,
                           });
-                          setUserAction({action: 'renew', data});
+                          setUserAction({action: 'renew'});
                           setSelServiceVar({
                             ...selServiceVar,
                             name: data?.Current_Bouquet,
@@ -289,13 +301,15 @@ const Services = ({navigation, route}: {navigation: any; route: any}) => {
       // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [selService]);
 
-    const VarItems = ({item}) => {
+    const VarItems = ({item}: {item: any}) => {
       return (
         <Card
           onPress={() => {
             setSelServiceVar(item);
             toggleModal(!showModal);
-            setContact({...selectContact, amount: item?.variation_amount});
+            if (curItem.identifier != 'electricity-bill') {
+              setContact({...selectContact, amount: item.variation_amount});
+            }
           }}
           style={{marginBottom: 10}}>
           <Card.Content>
@@ -382,7 +396,6 @@ const Services = ({navigation, route}: {navigation: any; route: any}) => {
     let setting =
       curItem.identifier == 'data' || selService.serviceID.includes('waec');
 
-    console.log(setting);
     setContact({
       ...selectContact,
       email: emails[0],
@@ -448,7 +461,8 @@ const Services = ({navigation, route}: {navigation: any; route: any}) => {
 
       if (go === true) {
         if (beny) {
-          navigation.navigate('TransactionDetails', {...beny,
+          navigation.navigate('TransactionDetails', {
+            ...beny,
             details: {
               ...beny.details,
               amount: selectContact.amount,
@@ -480,7 +494,7 @@ const Services = ({navigation, route}: {navigation: any; route: any}) => {
               image: selService.image,
               xtra: cFee,
               name: selService.name,
-              userInfo: userInfo.data.content,
+              userInfo: customerInfo.data.content,
               action: userAction.action === 'new' ? 'change' : 'renew',
               varName: selServiceVar.name,
               type: curItem.identifier,
@@ -577,7 +591,7 @@ const Services = ({navigation, route}: {navigation: any; route: any}) => {
                       setSelService(service);
                       setSelServiceVar(selectedVariation);
                       setContact({...selectContact, biller: ''});
-                      setUserAction({...userAction, action: ''});
+                      setUserAction({action: ''});
                     }}
                   />
                 )}
@@ -802,7 +816,7 @@ const Services = ({navigation, route}: {navigation: any; route: any}) => {
                             }
                           />
                         )}
-                        {userInfo.loading && (
+                        {customerInfo.loading && (
                           <View
                             style={[
                               styles.fcenter,
@@ -864,6 +878,15 @@ const Services = ({navigation, route}: {navigation: any; route: any}) => {
                       )}
                       <Button
                         mode="contained"
+                        disabled={
+                          curItem.identifier === 'tv-subscription' ||
+                          curItem.identifier === 'electricity-bill' ||
+                          curItem.identifier === 'education'
+                            ? customerInfo.data.content.Customer_Name == undefined
+                              ? true
+                              : false
+                            : false
+                        }
                         style={css.button}
                         labelStyle={{color: sec}}
                         onPress={submitFormFunc}>
@@ -872,7 +895,7 @@ const Services = ({navigation, route}: {navigation: any; route: any}) => {
                     </View>
                   </View>
                 )}
-                <Others items={others} except={curItem.identifier} />
+                <Others />
               </>
             }
           />

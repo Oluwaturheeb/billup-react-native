@@ -53,7 +53,7 @@ export const service: SelectedService = {
 export const selectedVariation: SelectedVariation = {
   variation_code: '',
   name: '',
-  variation_amount: '',
+  variation_amount: 0,
   fixedPrice: '',
 };
 
@@ -201,6 +201,18 @@ export const statistics = {
   },
 };
 
+export const customerInfoSchema = {
+  Current_Bouquet: '',
+  Current_Bouquet_Code: '',
+  Customer_Name: '',
+  Customer_Number: 0,
+  Customer_Type: '0',
+  Due_Date: '',
+  Renewal_Amount: 0,
+  Status: '',
+  Address: '',
+};
+
 export const beneficiarySchema: Beneficiary = {
   keys: [],
   value: {
@@ -214,7 +226,7 @@ export const beneficiarySchema: Beneficiary = {
         phone: '',
         product_type_id: 0,
         serviceID: '',
-        variation_code: 0,
+        variation_code: '',
       },
       details: {
         amount: 0,
@@ -224,16 +236,7 @@ export const beneficiarySchema: Beneficiary = {
         phone: '',
       },
       info: {
-        userInfo: {
-          Current_Bouquet: '',
-          Current_Bouquet_Code: '',
-          Customer_Name: '',
-          Customer_Number: 0,
-          Customer_Type: '0',
-          Due_Date: '',
-          Renewal_Amount: 0,
-          Status: '',
-        },
+        userInfo: customerInfoSchema,
         foreign: {
           service: '',
           image: '',
@@ -247,6 +250,8 @@ export const beneficiarySchema: Beneficiary = {
         total: 0,
         type: '',
         xtra: 0,
+        varName: '',
+        action: '',
       },
     },
   },

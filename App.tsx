@@ -32,12 +32,14 @@ import Search from './components/Search';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import Beneficiary from './components/Beneficiary';
 import CodePush from 'react-native-code-push';
+import {UserSchema} from './components/schema';
 
 const App = () => {
   const Stack = createNativeStackNavigator();
-  const navRef = useRef();
-  
+  const navRef: any = useRef();
+
   const Headers = ({props}: {props: any}) => {
+    let routeName = props.route.name;
     return (
       <LinearGradient
         colors={[pry + 'dd', pry + 'cc']}
@@ -53,7 +55,18 @@ const App = () => {
               <View style={[styles.frow]}>
                 <IconButton
                   icon="magnify"
-                  onPress={() => props.navigation.navigate('Logs', 1)}
+                  onPress={() =>
+                    props.navigation.navigate(
+                      'Logs',
+                      routeName == 'Admin'
+                        ? {account: 'admin'}
+                        : routeName == 'Stats'
+                        ? {account: 'admin'}
+                        : routeName == 'CustomerProfile'
+                        ? {account: 'admin-customer'}
+                        : {account: 'user'},
+                    )
+                  }
                   iconColor={sec}
                   style={{marginVertical: 10}}
                 />
@@ -76,7 +89,18 @@ const App = () => {
               <View style={[styles.frow]}>
                 <IconButton
                   icon="magnify"
-                  onPress={() => props.navigation.navigate('Logs', 1)}
+                  onPress={() =>
+                    props.navigation.navigate(
+                      'Logs',
+                      routeName == 'Admin'
+                        ? {account: 'admin'}
+                        : routeName == 'Stats'
+                        ? {account: 'admin'}
+                        : routeName == 'CustomerProfile'
+                        ? {account: 'admin-customer'}
+                        : {account: 'user'},
+                    )
+                  }
                   iconColor={sec}
                   style={{marginVertical: 10}}
                 />
@@ -100,9 +124,8 @@ const App = () => {
   };
 
   const NavDrawer = () => {
-    const nav = useNavigation();
-    let {user} = useUser();
-
+    const nav: any = useNavigation();
+    let {user, setUser, setId} = useUser();
     return (
       <LinearGradient
         colors={[pry + '11', pry + '44']}
@@ -255,8 +278,10 @@ const App = () => {
                 rippleColor={pry + '44'}
                 onPress={async () => {
                   await AsyncStorage.removeItem('id');
-                  nav.navigate('Welcome');
+                  setId('');
+                  setUser(UserSchema);
                   navRef.current.closeDrawer();
+                  nav.navigate('Welcome');
                 }}>
                 <View style={[styles.frow, styles.fVertCenter, styles.p2]}>
                   <IconButton

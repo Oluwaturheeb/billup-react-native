@@ -21,24 +21,25 @@ import {click, pry, sec} from './colors';
 import styles from './styles';
 import {FlatList, Gesture, GestureDetector} from 'react-native-gesture-handler';
 import {Network} from './services/Components';
-import {adminTransaction, money, ref, updateFirebase, users} from './lib/firestore';
+import {
+  adminTransaction,
+  money,
+  ref,
+  updateFirebase,
+  users,
+} from './lib/firestore';
 import LinearGradient from 'react-native-linear-gradient';
-import PayWithFlutterwave from 'flutterwave-react-native';
-import Animated, {
-  useAnimatedStyle,
-  useSharedValue,
-  withSpring,
-} from 'react-native-reanimated';
-import {useUser} from './lib/context';
-import {homeData} from './schema';
-import {ContentProp, Logs} from './interfaces';
-import AsyncStorage from '@react-native-async-storage/async-storage';
-// import {Notifications} from 'react-native-notifications';
+import { User } from './interfaces';
 
 const height = Dimensions.get('screen').height;
-const width = Dimensions.get('screen').width;
 
-const CustomerProfile = ({navigation, route}: {navigation: any; route: any}) => {
+const CustomerProfile = ({
+  navigation,
+  route,
+}: {
+  navigation: any;
+  route: any;
+}) => {
   const id = route.params;
   const [data, setData] = useState({loading: true, data: []});
   const time = new Date().getHours();
@@ -48,7 +49,7 @@ const CustomerProfile = ({navigation, route}: {navigation: any; route: any}) => 
 
   useEffect(() => {
     (async () => {
-      let user = await users.doc(id).get();
+      let user: User = await users.doc(id).get();
       setData({loadding: false, data: user.data()});
     })();
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -66,9 +67,9 @@ const CustomerProfile = ({navigation, route}: {navigation: any; route: any}) => 
         <View style={{marginTop: 8, marginLeft: 8}}>
           <Text variant="bodyMedium" style={css.greetingText}>
             {data.data.givenName + ' ' + data.data.familyName}
-          </Text> 
+          </Text>
           <Text variant="bodySmall" style={[css.greetingText, {fontSize: 13}]}>
-          {data.data.email}
+            {data.data.email}
           </Text>
         </View>
       </View>
@@ -124,7 +125,7 @@ const CustomerProfile = ({navigation, route}: {navigation: any; route: any}) => 
     </View>
   );
 
-  const Services = () => {
+  /* const Services = () => {
     const others: ContentProp[] = [];
     const transY = useSharedValue(0);
     const context = useSharedValue({y: 0});
@@ -259,7 +260,7 @@ const CustomerProfile = ({navigation, route}: {navigation: any; route: any}) => 
         </Animated.View>
       </GestureDetector>
     );
-  };
+  }; */
 
   return (
     <View style={{flex: 1}}>

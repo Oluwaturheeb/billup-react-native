@@ -69,7 +69,6 @@ const Settings = () => {
                 backgroundColor: MD2Colors.grey200,
                 padding: 20,
                 width: '100%',
-                // marginLeft: '10%',
                 borderRadius: 5,
                 minHeight: '30%',
                 top: '30%',
@@ -82,19 +81,57 @@ const Settings = () => {
               </Text>
               <View style={[styles.fcenter, {top: '10%'}]}>
                 <View style={{marginBottom: 10}}>
+                  <View
+                    style={[
+                      styles.fspace,
+                      styles.frow,
+                      {position: 'absolute', bottom: 0, width: 150},
+                    ]}>
+                    <View
+                      style={{
+                        borderRadius: 5,
+                        borderWidth: 1,
+                        paddingVertical: 20,
+                        paddingHorizontal: 10,
+                      }}
+                    />
+                    <View
+                      style={{
+                        borderRadius: 5,
+                        borderWidth: 1,
+                        paddingVertical: 20,
+                        paddingHorizontal: 10,
+                      }}
+                    />
+                    <View
+                      style={{
+                        borderRadius: 5,
+                        borderWidth: 1,
+                        paddingVertical: 20,
+                        paddingHorizontal: 10,
+                      }}
+                    />
+                    <View
+                      style={{
+                        borderRadius: 5,
+                        borderWidth: 1,
+                        paddingVertical: 20,
+                        paddingHorizontal: 10,
+                      }}
+                    />
+                  </View>
                   <TextInput
                     value={text.text}
                     onChangeText={txt => setText({...text, text: txt})}
                     placeholder="...."
                     style={{
+                      letterSpacing: 20,
                       backgroundColor: 'transparent',
-                      letterSpacing: 30,
                       width: 150,
-                      // textAlign: 'center',
                     }}
-                    outlineColor={pry}
-                    activeUnderlineColor={pry}
-                    underlineColor={pry}
+                    outlineColor={pry + '00'}
+                    activeUnderlineColor={pry + '00'}
+                    underlineColor={pry + '00'}
                     textColor={pry}
                     placeholderTextColor={pry}
                   />

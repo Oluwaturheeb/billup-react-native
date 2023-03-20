@@ -23,6 +23,7 @@ import {useUser} from './lib/context';
 import {homeData} from './schema';
 import {ContentProp, Logs} from './interfaces';
 import AsyncStorage from '@react-native-async-storage/async-storage';
+// import {genKeys} from './lib/firestore';
 
 const height = Dimensions.get('screen').height;
 
@@ -251,7 +252,7 @@ const Home = ({navigation}: {navigation: any}) => {
           onPress={() =>
             navigation.navigate(
               item.identifier == 'airtime' ? 'Airtime' : 'Services',
-              {item, others},
+              {item},
             )
           }>
           <View
