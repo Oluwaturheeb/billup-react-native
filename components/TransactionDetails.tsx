@@ -73,7 +73,7 @@ const TransactionDetails = ({
           setStatus(data);
           clearInterval(interval);
         }
-      }, 4000);
+      }, 5000);
     }
   }
 
@@ -87,6 +87,14 @@ const TransactionDetails = ({
         let query = await axios.post('/pay', {
           ...data,
           request_id: requestId,
+          billersCode:
+            beneficiaryType === 'airtime'
+              ? '08011111111'
+              : beneficiaryType === 'data'
+              ? '08011111111'
+              : beneficiaryType === 'tv-subscription'
+              ? '1212121212'
+              : '1111111111111',
         });
         req = query.data;
       } else {
@@ -96,7 +104,6 @@ const TransactionDetails = ({
           status: 'failed',
         };
       }
-      console.log(req);
 
       let msg =
         req?.code === '000'
