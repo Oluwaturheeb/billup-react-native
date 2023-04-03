@@ -62,6 +62,8 @@ const TransactionDetails = ({
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [status.code]);
 
+  console.log(JSON.stringify(status, null, 2));
+
   if (status.code === '000') {
     if (status.content.transactions.status == 'pending') {
       let interval = setInterval(async () => {
@@ -104,6 +106,9 @@ const TransactionDetails = ({
           status: 'failed',
         };
       }
+
+      console.log(req);
+      
 
       let msg =
         req?.code === '000'
