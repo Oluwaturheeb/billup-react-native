@@ -1,4 +1,4 @@
 <resources>
-    <string name="app_name">Billup</string>
+    <string name="app_name">Command</string>
     <string moduleConfig="true" name="CodePushDeploymentKey">IxpekGBGm4li3dbIL92gz-Kc7eLVwTOutLn50</string>
 </resources>
